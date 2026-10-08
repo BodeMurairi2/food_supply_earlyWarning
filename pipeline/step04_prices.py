@@ -45,6 +45,7 @@ def window_means(monthly, keys):
 
 
 def main():
+    """Pick the most local staple price available (district, province, national) and save 04_prices.csv."""
     p = pd.read_csv(DATA / "prices" / "wfp_food_prices_rwa.csv", skiprows=[1])
     p = p[(p["pricetype"] == "Retail") & (p["unit"] == "KG") & p["commodity"].isin(COMMODITIES)]
     p["commodity"] = p["commodity"].map(COMMODITIES)
