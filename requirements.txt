@@ -11,3 +11,4 @@ catboost
 matplotlib
 tensorboard
 jupyter
+tensorboardX
