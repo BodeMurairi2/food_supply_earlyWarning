@@ -20,12 +20,14 @@ STATIONS = "data/nisr/station_temperature_2024.csv"
 
 
 def at_stations(field, st):
+    """Return the ERA5-Land temperature at each station's location and month."""
     dates = pd.to_datetime(dict(year=st["year"], month=st["month"], day=1))
     points = field.sel(lat=xr.DataArray(st["lat"]), lon=xr.DataArray(st["lon"]), method="nearest")
     return points.sel(time=xr.DataArray(dates)).values
 
 
 def main():
+    """Compare ERA5-Land with the 2024 station temperatures and save the comparison tables."""
     st = pd.read_csv(STATIONS)
     st["station_mean_c"] = (st["tmax_c"] + st["tmin_c"]) / 2
     pairs = {"mean": ("station_mean_c", pt.load_monthly_mean())}

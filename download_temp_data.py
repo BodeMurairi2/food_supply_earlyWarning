@@ -1,3 +1,10 @@
+"""Download satellite land surface temperature over Rwanda from the Copernicus CDS, 1995-2025.
+
+One request per year and per observation time (day and night), because the CDS limits
+the cost of each request. Files are saved to data/land_surface_temperature/ and files
+that already exist are skipped.
+"""
+
 from pathlib import Path
 
 import cdsapi
