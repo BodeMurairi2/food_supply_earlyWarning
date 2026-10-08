@@ -20,6 +20,7 @@ BASELINE = (1995, 2024)
 
 
 def main():
+    """Compute seasonal and 12-month temperature features and anomalies and save 03_temperature.csv."""
     t = pd.read_csv(DATA / "processed" / "temperature_monthly_district.csv")[["district", "year", "month", "temp_mean_c"]]
 
     parts = []

@@ -68,6 +68,7 @@ def window_months(year):
 
 
 def save(df, name):
+    """Save a step's output table to data/features/<name>, print its size and return the path."""
     FEATURES.mkdir(parents=True, exist_ok=True)
     path = FEATURES / name
     df.to_csv(path, index=False)

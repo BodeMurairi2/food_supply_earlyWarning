@@ -16,6 +16,7 @@ STEPS = ["02_rainfall.csv", "03_temperature.csv", "04_prices.csv", "05_sas.csv"]
 
 
 def main():
+    """Merge the target and all feature tables into food_security_dataset.csv and print feature coverage."""
     df = pd.read_csv(FEATURES / "01_target.csv")
     for name in STEPS:
         step = pd.read_csv(FEATURES / name)
