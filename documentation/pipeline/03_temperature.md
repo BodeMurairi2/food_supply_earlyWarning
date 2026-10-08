@@ -1,7 +1,7 @@
 # Step 3 – Temperature features
 
 **Script:** `pipeline/step03_temperature.py`
-**Input:** `data/processed/temperature_monthly_district.csv` — ERA5-Land monthly mean 2 m air temperature per district, 1995 – Sep 2026. How it was built and validated against NISR stations is in `documentation/temperature_data_approach.docx` (scripts `download_era5_land.py`, `process_temperature.py`).
+**Input:** `data/processed/temperature_monthly_district.csv` — ERA5-Land monthly mean 2 m air temperature per district, 1995 – Sep 2026. How it was built and validated against NISR stations is in `documentation/temperature_data_approach.docx` (scripts `download_scripts/download_era5_land.py`, `pipeline/process_temperature.py`).
 **Output:** `data/features/03_temperature.csv` (630 rows, no missing values)
 
 ## Features

@@ -3,7 +3,7 @@
 - 1995 up to last year: the monthly means product, in a single request.
 - Current year: the CDS restricts monthly means of the newest, preliminary data
   (ERA5-LandT), so we download hourly values for the complete months available and
-  average them per month in process_temperature.py. The monthly means product is itself
+  average them per month in pipeline/process_temperature.py. The monthly means product is itself
   an average of all hours, so the two are consistent.
 
 Files that already exist are skipped, so the script is safe to re-run, e.g. later in
@@ -23,8 +23,9 @@ AREA = [-1, 28.8, -2.9, 31]
 # The hourly dataset allows a cost of 12,000 per request; one month costs ~1,500.
 MONTHS_PER_HOURLY_REQUEST = 6
 
-MONTHLY_DIR = Path("data/era5_land/monthly")
-HOURLY_DIR = Path("data/era5_land/hourly")
+ROOT = Path(__file__).resolve().parent.parent  # repository root, so the script runs from any folder
+MONTHLY_DIR = ROOT / "data" / "era5_land" / "monthly"
+HOURLY_DIR = ROOT / "data" / "era5_land" / "hourly"
 
 
 def make_client():

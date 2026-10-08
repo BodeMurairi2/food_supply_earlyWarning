@@ -16,7 +16,7 @@ import xarray as xr
 
 import process_temperature as pt
 
-STATIONS = "data/nisr/station_temperature_2024.csv"
+STATIONS = pt.ROOT / "data" / "nisr" / "station_temperature_2024.csv"
 
 
 def at_stations(field, st):
