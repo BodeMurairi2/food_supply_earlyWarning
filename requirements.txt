@@ -4,3 +4,10 @@ netCDF4
 geopandas
 regionmask
 pyreadstat
+pandas
+numpy
+scikit-learn
+catboost
+matplotlib
+tensorboard
+jupyter
