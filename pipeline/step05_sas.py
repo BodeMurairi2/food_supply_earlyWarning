@@ -45,6 +45,7 @@ UNIT_TO_KG = {r"^\s*kg|kilo": 1.0, r"^\s*g\b|gram": 0.001}
 
 
 def find(labels, pattern, exclude=None):
+    """Return the first column whose name or label matches `pattern` and not `exclude`, or None."""
     for col, lab in labels.items():
         text = f"{col} {lab or ''}"
         if re.search(pattern, text, re.I) and not (exclude and re.search(exclude, text, re.I)):
@@ -53,11 +54,13 @@ def find(labels, pattern, exclude=None):
 
 
 def season_of(path):
+    """Return the season letter (A, B or C) found in a file path, or None."""
     m = re.search(r"season[\s_-]*([abc])|([ABC])20\d\d", path, re.I)
     return (m.group(1) or m.group(2)).upper() if m else None
 
 
 def sas_files():
+    """List the 2017-2025 production and fertilizer files with their year and season (small farms only)."""
     rows = []
     for year in YEARS:
         for f in sorted((DATA / "sas" / str(year)).rglob("*.dta")):
@@ -72,6 +75,7 @@ def sas_files():
 
 
 def read(path):
+    """Read a Stata file and return the data, column labels and value labels."""
     d, meta = pyreadstat.read_dta(path, apply_value_formats=False)
     return d, meta.column_names_to_labels, meta.variable_value_labels
 
@@ -94,10 +98,12 @@ def decode(d, vlabels, col, fallback_labels=None):
 
 
 def yes_no(text):
+    """Turn yes/no answers into 1.0 (yes), 0.0 (no) or NaN (blank)."""
     return np.where(text.str.match(r"^(yes|1(\.0)?$)"), 1.0, np.where(text.isin(["", "nan", "none"]), np.nan, 0.0))
 
 
 def district_column(d, vlabels):
+    """Return the district name of each row, from value labels or numeric district codes."""
     raw = d["s1q2"]
     labels = vlabels.get("s1q2", {})
     names = raw.map(lambda v: clean_district(labels.get(_code(v), v)))
@@ -108,6 +114,7 @@ def district_column(d, vlabels):
 
 
 def weight_column(labels):
+    """Return the name of the plot weight column, or None if the file has no weights."""
     for name in ["finalplot_weight", "plot_weight", "Plot_weight", "weight_plot", "weight"]:
         if name in labels:
             return name
@@ -129,6 +136,7 @@ CROP_LABELS = {}  # year -> crop value labels, reused when a season's file has n
 
 
 def production_season(path, year):
+    """Return per-plot crop, harvest, area, seed type and share sold for one production file."""
     d, labels, vlabels = read(path)
     found = {
         "crop": find(labels, r"crop[ _.]*(name|code)", exclude=r"_o\b|specify|other|categor"),
@@ -190,6 +198,7 @@ def production_season(path, year):
 
 
 def fertilizer_season(path):
+    """Return per-plot inorganic fertilizer use and kg by type (DAP, urea, NPK) for one file."""
     d, labels, vlabels = read(path)
     cols = list(labels)
     used = find(labels, r"inorganic fertil\w* in this plot") or ("s3q9" if "s3q9" in labels else None)
@@ -239,6 +248,7 @@ def fertilizer_season(path):
 
 
 def summarise_production(p):
+    """Sum weighted harvest, crop area, improved seed and % sold per district."""
     rows = []
     for district, g in p.groupby("district"):
         r = {"district": district}
@@ -258,6 +268,7 @@ def summarise_production(p):
 
 
 def summarise_fertilizer(f):
+    """Sum weighted fertilizer use and kg per district, counting each plot's area once."""
     plots = f.groupby(["district", "plot_key"]).agg(
         w=("w", "first"), plot_ha=("plot_ha", "first"), inorganic_used=("inorganic_used", "max"),
         inorganic_kg=("inorganic_kg", "sum"), dap_kg=("dap_kg", "sum"), urea_kg=("urea_kg", "sum"), npk_kg=("npk_kg", "sum"),
@@ -273,6 +284,7 @@ def summarise_fertilizer(f):
 
 
 def main():
+    """Build SAS features per district and target year and save 05_sas.csv."""
     files = sas_files()
     seasons, found_log = [], []
     files["order"] = files["season"].map({"A": 0, "B": 1, "C": 2})
