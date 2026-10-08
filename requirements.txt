@@ -1,0 +1,6 @@
+cdsapi
+xarray
+netCDF4
+geopandas
+regionmask
+pyreadstat
