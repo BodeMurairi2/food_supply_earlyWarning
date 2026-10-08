@@ -28,6 +28,7 @@ HOURLY_DIR = Path("data/era5_land/hourly")
 
 
 def make_client():
+    """Create a CDS API client using the url and key saved in ~/.cdsapirc."""
     # Reuse the credentials from ~/.cdsapirc.
     config = {}
     with open(os.path.expanduser("~/.cdsapirc")) as f:
@@ -51,6 +52,7 @@ def complete_months(client, year):
 
 
 def monthly_request(years):
+    """Build the CDS request for ERA5-Land monthly mean temperature over Rwanda for `years`."""
     return {
         "product_type": ["monthly_averaged_reanalysis"],
         "variable": ["2m_temperature"],
@@ -64,6 +66,7 @@ def monthly_request(years):
 
 
 def hourly_request(year, months):
+    """Build the CDS request for hourly ERA5-Land temperature for the given months of one year."""
     return {
         "variable": ["2m_temperature"],
         "year": [str(year)],
@@ -77,6 +80,7 @@ def hourly_request(year, months):
 
 
 def main():
+    """Download the monthly means for 1995 to last year and the hourly files for this year."""
     MONTHLY_DIR.mkdir(parents=True, exist_ok=True)
     HOURLY_DIR.mkdir(parents=True, exist_ok=True)
     client = make_client()

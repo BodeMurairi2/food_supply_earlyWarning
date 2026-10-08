@@ -44,6 +44,7 @@ def open_t2m(path):
 
 
 def load_monthly_mean():
+    """Return monthly mean temperature in °C, adding this year's months averaged from hourly files."""
     files = sorted((ERA5_DIR / "monthly").glob("t2m_monthly_mean_*.nc"))
     if not files:
         raise SystemExit("No monthly files yet - run download_era5_land.py first")
@@ -77,6 +78,7 @@ def regional_mean(field, weights):
 
 
 def aggregate(field, regions_gdf, name_col):
+    """Return monthly mean temperature per region as a table with date, region and temp_mean_c."""
     weights = region_weights(regions_gdf, name_col, field)
     df = regional_mean(field, weights).to_series().rename("temp_mean_c").reset_index()
     df["region"] = df["region"].map(dict(enumerate(regions_gdf[name_col])))
@@ -84,6 +86,7 @@ def aggregate(field, regions_gdf, name_col):
 
 
 def main():
+    """Write monthly mean temperature per province and per district to data/processed/."""
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     t2m = load_monthly_mean()
 
