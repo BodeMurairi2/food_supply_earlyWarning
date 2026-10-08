@@ -28,6 +28,7 @@ SKIP = r"lsf|_big|province|phys|national|yield|total"
 
 
 def _season(path):
+    """Return the season letter (A, B or C) found in a file path, or None."""
     m = re.search(r"season[\s_-]*([abc])\b|season[\s_-]*([abc])[^a-z]|screening_?([abc])\b|screening2016([abc])", path, re.I)
     return next(g for g in m.groups() if g).upper() if m else None
 
@@ -40,6 +41,7 @@ def _district(ids):
 
 
 def _pick(labels, names=(), pattern=None):
+    """Return the first column named in `names`, else the first whose name or label matches `pattern`."""
     lower = {c.lower(): c for c in labels}
     for n in names:
         if n.lower() in lower:
@@ -52,11 +54,13 @@ def _pick(labels, names=(), pattern=None):
 
 
 def _decode(d, vlabels, col):
+    """Return the value labels of column `col` as lowercase text."""
     mapping = vlabels.get(col, {})
     return d[col].map(lambda v: str(mapping.get(v, v))).str.lower()
 
 
 def _files():
+    """List the 2013-2016 SAS files with their year and season, skipping large-farm and national files."""
     rows = []
     for year in YEARS:
         for f in sorted((DATA / "sas" / str(year)).rglob("*.dta")):
@@ -68,11 +72,13 @@ def _files():
 
 
 def _read(path):
+    """Read a Stata file and return the data, column labels and value labels."""
     d, meta = pyreadstat.read_dta(path, apply_value_formats=False)
     return d, meta.column_names_to_labels, meta.variable_value_labels
 
 
 def area_by_crop(d, labels, vlabels, crops):
+    """Return weighted crop area (ha) per district and crop from a screening file, or None."""
     crop = _pick(labels, ["crop_code"])
     area = _pick(labels, ["ha", "Area_Ha", "Area", "area_crop", "Ha_p"])
     ident = _pick(labels, ["idquest", "tractid"])
@@ -90,6 +96,7 @@ def area_by_crop(d, labels, vlabels, crops):
 
 
 def share(d, labels, vlabels, col, positive, negative):
+    """Return weighted totals per district of all records and of records matching `positive`."""
     ident = _pick(labels, ["idquest", "tractid"])
     if not (col and ident):
         return None
@@ -140,6 +147,7 @@ def season_table(paths, crops):
 
 
 def legacy_seasons(crops):
+    """Build district tables for every usable 2013-2016 season and return them with a log of files used."""
     seasons, log = [], []
     files = _files()
     for (year, season), g in files.groupby(["year", "season"]):
