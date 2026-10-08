@@ -24,7 +24,7 @@ request = {
 
 # CDS charges 1 unit per month per observation time, with a limit of 13 per request
 # (the area crop does not reduce the cost), so request one year and one observation time at a time.
-out_dir = Path("data/land_surface_temperature")
+out_dir = Path(__file__).resolve().parent.parent / "data" / "land_surface_temperature"
 out_dir.mkdir(parents=True, exist_ok=True)
 
 client = cdsapi.Client()

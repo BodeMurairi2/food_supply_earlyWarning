@@ -17,7 +17,7 @@ DOCS = ROOT / "documentation" / "pipeline"
 
 FIRST_YEAR = 2006
 LAST_TARGET_YEAR = 2024
-LAST_YEAR = 2026  # rows for 2025-2026 carry features only (forecast rows)
+LAST_YEAR = 2026
 YEARS = list(range(FIRST_YEAR, LAST_YEAR + 1))
 
 # NISR district codes: province digit + district number (RW11 = Nyarugenge).

@@ -1,6 +1,6 @@
 """Aggregate ERA5-Land 2 m temperature to monthly means per Rwandan province and district.
 
-Inputs (from download_era5_land.py and GADM 4.1):
+Inputs (from download_scripts/download_era5_land.py and GADM 4.1):
     data/era5_land/monthly/t2m_monthly_mean_*.nc    monthly means, 1995 to last year
     data/era5_land/hourly/t2m_hourly_*.nc           hourly values for the current year
     data/boundaries/gadm41_RWA_1.json (provinces), gadm41_RWA_2.json (districts)
@@ -22,9 +22,10 @@ import pandas as pd
 import regionmask
 import xarray as xr
 
-ERA5_DIR = Path("data/era5_land")
-BOUNDARY_DIR = Path("data/boundaries")
-OUT_DIR = Path("data/processed")
+ROOT = Path(__file__).resolve().parent.parent  # repository root, so the script runs from any folder
+ERA5_DIR = ROOT / "data" / "era5_land"
+BOUNDARY_DIR = ROOT / "data" / "boundaries"
+OUT_DIR = ROOT / "data" / "processed"
 
 PROVINCE_EN = {
     "Amajyaruguru": "Northern",
@@ -47,7 +48,7 @@ def load_monthly_mean():
     """Return monthly mean temperature in °C, adding this year's months averaged from hourly files."""
     files = sorted((ERA5_DIR / "monthly").glob("t2m_monthly_mean_*.nc"))
     if not files:
-        raise SystemExit("No monthly files yet - run download_era5_land.py first")
+        raise SystemExit("No monthly files yet - run download_scripts/download_era5_land.py first")
     t2m = xr.concat([open_t2m(f) for f in files], dim="time").sortby("time")
     t2m = t2m.assign_coords(time=t2m["time"].dt.floor("D"))
 

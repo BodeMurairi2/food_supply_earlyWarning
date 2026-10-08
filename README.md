@@ -24,10 +24,9 @@ The final table, `food_security_dataset.csv`, has one row per district per year 
 ## Repository structure
 
 ```
-pipeline/                  data pipeline, one script per step (run_all.py runs them in order)
-download_era5_land.py      download ERA5-Land temperature from the Copernicus CDS
-process_temperature.py     aggregate temperature to provinces and districts
-validate_temperature.py    compare ERA5-Land with NISR weather stations
+pipeline/                  data pipeline, one script per step (run_all.py runs them in order),
+                           plus process_temperature.py and validate_temperature.py
+download_scripts/          download ERA5-Land temperature and satellite land surface temperature from the Copernicus CDS
 analysis.ipynb             feature selection, CatBoost model, experiments, TensorBoard logging
 food_security_dataset.csv  final modelling table
 runs/                      TensorBoard logs of the experiments

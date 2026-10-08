@@ -2,7 +2,7 @@
 
 Source: data/processed/temperature_monthly_district.csv
 (ERA5-Land monthly mean 2 m air temperature per district, 1995-2026; built by
-process_temperature.py, see documentation/temperature_data_approach.docx).
+pipeline/process_temperature.py, see documentation/temperature_data_approach.docx).
 
 Same windows as the rainfall step: Season B (March-May of t-1), Season A
 (September-December of t-1) and the 12 months March t-1 to February t. Anomalies are
