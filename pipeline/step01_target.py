@@ -35,6 +35,7 @@ ITEM_GROUPS = [
 
 
 def weighted_pct(df, flag, weight, by="district"):
+    """Return the weighted % of households where `flag` is true per district, and households counted."""
     w = df[weight] if weight else pd.Series(1.0, index=df.index)
     tmp = df.assign(_w=w, _x=df[flag].astype(float) * w)
     g = tmp.groupby(by)
@@ -49,6 +50,7 @@ def fcs_from_days(days):
 
 
 def cari_round(year, path, weight):
+    """Return % CARI food insecure and % poor food consumption per district for one CFSVA round."""
     d, _ = pyreadstat.read_sav(path, usecols=["S0_D_Dist", "FS_final", "FCS", weight], apply_value_formats=True)
     d = d.dropna(subset=["FS_final"]).assign(district=lambda x: x["S0_D_Dist"].map(clean_district))
     d["cari_insecure"] = d["FS_final"].astype(str).str.contains("insecure", case=False)
@@ -59,6 +61,7 @@ def cari_round(year, path, weight):
 
 
 def fcs_round_2012():
+    """Return % of households with poor food consumption (FCS <= 35) per district from the 2012 CFSVA."""
     d, _ = pyreadstat.read_sav(CFSVA / "2012" / "cfsvans-2012- household-v01.sav",
                                usecols=["d_code", "FCS", "FINAL_PopWeight"], apply_value_formats=True)
     d = d.dropna(subset=["FCS"]).assign(district=lambda x: x["d_code"].map(clean_district), fcs_inadequate=lambda x: x["FCS"] <= 35)
@@ -67,6 +70,7 @@ def fcs_round_2012():
 
 
 def fcs_round_2006():
+    """Return % of households with poor food consumption per district from the 2006 CFSVA."""
     items = [f"q9_4_{i}" for i in range(1, 22)]
     d, _ = pyreadstat.read_sav(CFSVA / "2006" / "Data" / "June_10_Section1_11.sav", usecols=["distr06", "hhweight"] + items)
     d = d.dropna(subset=["distr06"])
@@ -78,6 +82,7 @@ def fcs_round_2006():
 
 
 def fcs_round_2009():
+    """Return % of households with poor food consumption per district from the 2009 CFSVA (unweighted)."""
     d, _ = pyreadstat.read_sav(CFSVA / "2009" / "Data" / "S9 Question.sav", usecols=["ID1", "ID2", "CODE_HH", "S9Q3J", "S9Q3L"])
     d = d[d["S9Q3J"].between(94, 114)]  # 21 food items; 115 (spices) is not part of the FCS
     days = d.pivot_table(index=["ID1", "ID2", "CODE_HH"], columns="S9Q3J", values="S9Q3L", aggfunc="max")
@@ -91,6 +96,7 @@ def fcs_round_2009():
 
 
 def main():
+    """Build the food insecurity target per district and year and save 01_target.csv."""
     cari = pd.concat([
         cari_round(2015, CFSVA / "2015" / "cfsva-2015-master-DB- annex.sav", "weight"),
         cari_round(2018, CFSVA / "2018" / "1_CFSVA18_DB_HouseholdQues_Full_Annex_201904_NISR.sav", "FinalWeight"),

@@ -20,6 +20,7 @@ BASELINE = (1981, 2010)
 
 
 def main():
+    """Compute seasonal and 12-month rainfall features per district and year and save 02_rainfall.csv."""
     r = pd.read_csv(DATA / "rainfall" / "data" / "processed" / "rwanda_rainfall_district_monthly.csv")
     r = r[["district", "year", "month_num", "rain_mm", "normal_mm"]]
 
