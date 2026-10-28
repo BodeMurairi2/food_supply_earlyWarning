@@ -1,0 +1,24 @@
+# Render Blueprint: one free web service built from the Dockerfile.
+# Secrets marked sync: false are entered in the Render dashboard, never stored in the repo.
+services:
+  - type: web
+    name: harvestwatch
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: HW_LLM_MODEL
+        value: openrouter/google/gemini-3.5-flash
+      - key: SEARCH_DEPTH
+        value: advanced
+      - key: HW_AI_LIMIT_PER_HOUR
+        value: "5"
+      - key: HW_AI_LIMIT_PER_DAY
+        value: "60"

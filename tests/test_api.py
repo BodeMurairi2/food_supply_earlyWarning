@@ -85,3 +85,22 @@ def test_viz_trends_district_level_and_errors(client):
 def test_viz_profile(client):
     p = client.get("/api/visualizations/profile", params={"district": "Huye"}).json()
     assert p["area"] == "Huye" and len(p["rows"]) == 6 and len(p["crops"]) == 5
+
+
+def test_rate_limiter():
+    from api.services.ratelimit import RateLimiter
+    rl = RateLimiter(per_client_hour=2, per_day=3)
+    assert rl.check("a") is None and rl.check("a") is None
+    assert "per hour" in rl.check("a")
+    assert rl.check("b") is None
+    assert "daily limit" in rl.check("c")
+
+
+def test_frontend_routes(client):
+    from api import config
+    if not config.FRONTEND_DIST.is_dir():
+        pytest.skip("frontend not built")
+    assert "<div id=\"root\">" in client.get("/forecasts").text  # SPA route falls back to index.html
+    assert client.get("/favicon.svg").headers["content-type"].startswith("image/svg")
+    assert client.get("/api/does-not-exist").status_code == 404
+    assert "<div id=\"root\">" in client.get("/../../.env").text  # no file access outside dist
