@@ -54,6 +54,23 @@ pip install -r requirements.txt
    tensorboard --logdir runs
    ```
    Then open http://localhost:6006. TensorBoard shows the loss and macro F1 at every iteration, the 2024 test scores, each experiment's confusion matrix (Images tab) and its hyperparameters (HParams tab).
+4. **Run the web app.** The app uses the saved random forest models in `models/` and `food_security_dataset.csv`. It does not retrain anything.
+   ```bash
+   # backend (from the repo root), http://localhost:8000/docs
+   uvicorn api.main:app --port 8000
+
+   # frontend (second terminal), http://localhost:5173
+   cd frontend
+   npm install
+   npm run dev
+   ```
+   The frontend sends `/api` requests to the backend on port 8000.
+
+   **AI Analyst keys.** The AI Analyst needs an OpenRouter key (the LLM) and a Tavily key (web search). We copy `.env.example` to `.env`, fill in the keys and restart the backend. `.env` is git-ignored. `HW_LLM_MODEL` picks the model (any LiteLLM id; OpenRouter ids start with `openrouter/`). Without keys, the rest of the app still works and the AI page says which key is missing.
+5. **Test the API:**
+   ```bash
+   python -m pytest tests -q
+   ```
 
 ## Model
 

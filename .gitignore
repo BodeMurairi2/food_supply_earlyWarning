@@ -8,3 +8,7 @@ data/
 logs/
 push.sh
 documentation/
+frontend/node_modules/
+frontend/dist/
+.pytest_cache/
+.env
