@@ -8,12 +8,14 @@ import uvicorn
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import APIRouter, FastAPI, HTTPException, Query
+from fastapi import APIRouter, FastAPI, HTTPException, Query, Request
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 
 from api import config
 from api.agents.analyst import AIUnavailable, AIUpstreamError, run_analysis, tavily_search
 from api.schemas import AnalyzeRequest, HealthResponse, PredictRequest, PredictResponse, SearchRequest
+from api.services.ratelimit import RateLimiter
 from api.services.store import Store
 
 state: dict = {}
@@ -137,6 +139,13 @@ def viz_profile(province: Optional[str] = None, district: Optional[str] = None,
 # ---------- AI Analyst ----------
 # Analyses cost money and time, so identical requests are served from memory.
 _ai_cache: dict = {}
+_ai_limiter = RateLimiter(config.AI_LIMIT_PER_CLIENT_HOUR, config.AI_LIMIT_PER_DAY)
+
+
+def ai_rate_limit(request: Request):
+    message = _ai_limiter.check(request.client.host if request.client else "unknown")
+    if message:
+        raise HTTPException(status_code=429, detail=message)
 
 
 async def ai_guarded(coro):
@@ -159,18 +168,20 @@ def ai_context(district: str, year: int = Query(..., ge=config.TEST_YEARS[0], le
 
 
 @router.post("/ai/search")
-async def ai_search(req: SearchRequest):
+async def ai_search(req: SearchRequest, request: Request):
+    ai_rate_limit(request)
     results = await ai_guarded(tavily_search(req.query, req.max_results))
     return {"query": req.query, "results": results}
 
 
 @router.post("/ai/analyze")
-async def ai_analyze(req: AnalyzeRequest):
+async def ai_analyze(req: AnalyzeRequest, request: Request):
     question = (req.question or "").strip() or None
     key = (req.district, req.year, question)
     if key in _ai_cache:
         return {**_ai_cache[key], "cached": True}
     context = guarded(store().ai_context, req.district, req.year)
+    ai_rate_limit(request)
     result = await ai_guarded(run_analysis(context, question))
     out = {"district": req.district, "year": req.year, "question": question, "context": context, **result}
     _ai_cache[key] = out
@@ -182,6 +193,20 @@ app = FastAPI(title="HarvestWatch API", version="0.1.0",
               lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=config.CORS_ORIGINS, allow_methods=["GET", "POST"], allow_headers=["*"])
 app.include_router(router)
+
+
+# Serve the built frontend. Unknown paths return index.html so routes like /forecasts survive a page refresh.
+if config.FRONTEND_DIST.is_dir():
+    dist = config.FRONTEND_DIST.resolve()
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def frontend(path: str):
+        if path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="Not found")
+        file = (dist / path).resolve()
+        if path and file.is_file() and file.is_relative_to(dist):
+            return FileResponse(file)
+        return FileResponse(dist / "index.html")
 
 if __name__ == "__main__":
     uvicorn.run(
