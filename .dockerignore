@@ -1,0 +1,23 @@
+# Keep secrets, data and local environments out of the image.
+.env
+*.env
+.git
+venv/
+**/__pycache__
+**/*.pyc
+.pytest_cache
+frontend/node_modules
+frontend/dist
+data/
+logs/
+runs/
+catboost_info/
+catboost_logs/
+documentation/
+download_scripts/
+pipeline/
+tests/
+*.ipynb
+*.png
+train.csv
+test.csv
