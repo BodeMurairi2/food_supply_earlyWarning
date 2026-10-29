@@ -28,10 +28,10 @@ The AI endpoints spend OpenRouter and Tavily credits, so the public app limits t
 ## Test the image locally
 
 ```bash
-docker build -t harvestwatch:local .
-docker run --rm -p 8000:8000 --env-file .env harvestwatch:local
-# open http://localhost:8000
+docker compose up --build      # open http://localhost:8000; stop with docker compose down
 ```
+
+`docker-compose.yml` is for local runs only (Render reads `render.yaml`). It uses the same `Dockerfile`, reads keys from `.env` if present, and caps memory at 512 MB like Render's free plan.
 
 ## Notes
 

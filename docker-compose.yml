@@ -1,0 +1,19 @@
+# Local run of the same container Render deploys: docker compose up --build, then open http://localhost:8000
+# Render does not read this file; production settings are in render.yaml.
+services:
+  harvestwatch:
+    build: .
+    image: harvestwatch:local
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false   # without keys the app runs; only the AI Analyst is disabled
+    mem_limit: 512m       # same memory as Render's free plan
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
