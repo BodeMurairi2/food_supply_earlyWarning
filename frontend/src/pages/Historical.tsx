@@ -10,10 +10,65 @@ import { Card, EmptyState, ErrorState, Loading, Note, PageHeader, Pagination, Ri
 import { useApi } from '../hooks/useApi'
 import { num, pct, shortProvince, signed } from '../lib/format'
 import { api } from '../services/api'
-import type { HistoricalRow } from '../types/api'
+import type { ClassificationScores, HistoricalRow } from '../types/api'
 
 const PAGE_SIZE = 15
 const TEST_YEARS = [2021, 2022, 2023, 2024]
+
+/** How well the predicted percentages land in the right risk class, on the real surveys only. */
+function RiskClassCard({ scores }: { scores: ClassificationScores }) {
+  const high = scores.classes.find((c) => c.label === 'High')
+  return (
+    <Card title="Risk class performance on real surveys"
+      subtitle={`Predictions turned into Low, Medium and High, compared with the 2021 and 2024 surveys (${scores.n} district-years). Accuracy ${num(scores.accuracy, 3)}.`}>
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px]">
+          <thead>
+            <tr className="border-b border-gray-100">
+              <th className="th">Class</th><th className="th text-right">Precision</th><th className="th text-right">Recall</th>
+              <th className="th text-right">F1</th><th className="th text-right">ROC-AUC</th>
+              <th className="th text-right">Correct / observed</th><th className="th text-right">Predicted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {scores.classes.map((c) => (
+              <tr key={c.label} className="border-b border-gray-50">
+                <td className="td"><RiskBadge risk={c.label} /></td>
+                <td className="td text-right tabular-nums">{c.precision.toFixed(3)}</td>
+                <td className="td text-right tabular-nums">{c.recall.toFixed(3)}</td>
+                <td className="td text-right tabular-nums">{c.f1.toFixed(3)}</td>
+                <td className="td text-right tabular-nums">{c.roc_auc?.toFixed(3) ?? '—'}</td>
+                <td className="td text-right tabular-nums">{c.correct} / {c.observed}</td>
+                <td className="td text-right tabular-nums">{c.predicted}</td>
+              </tr>
+            ))}
+            <tr className="font-medium">
+              <td className="td text-gray-900">Average of classes</td>
+              <td className="td text-right tabular-nums text-gray-900">{scores.macro.precision.toFixed(3)}</td>
+              <td className="td text-right tabular-nums text-gray-900">{scores.macro.recall.toFixed(3)}</td>
+              <td className="td text-right tabular-nums text-gray-900">{scores.macro.f1.toFixed(3)}</td>
+              <td className="td text-right tabular-nums text-gray-900">{scores.macro.roc_auc?.toFixed(3) ?? '—'}</td>
+              <td className="td" /><td className="td" />
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div className="mt-3 space-y-2">
+        {high && (
+          <Note>
+            High districts are often missed: the model caught {high.correct} of {high.observed} on these surveys and labelled most of the
+            others Medium. Read the percentage and the ranking as well as the label, and treat districts near 30% as a warning too.
+            With only {high.observed} High districts, these figures can move a lot.
+          </Note>
+        )}
+        <Note>
+          Low, Medium and High are illustrative thresholds (15% and 30%), not official NISR categories. ROC-AUC measures how well districts
+          are ranked for each class, using the share of the forest's trees that predict that class.
+        </Note>
+      </div>
+    </Card>
+  )
+}
 
 export default function Historical() {
   const [loc, setLoc] = useState<LocationValue>({ province: '', district: '' })
@@ -61,6 +116,8 @@ export default function Historical() {
               value={pct(p.risk_class_agreement_real_surveys * 100, 0)} hint="Low / Medium / High, real surveys" />
           </div>
         )}
+
+        {p && <RiskClassCard scores={p.classification_real_surveys} />}
 
         {hist.error && <ErrorState message={hist.error} onRetry={hist.reload} />}
         {hist.loading && !hist.data && <Loading />}

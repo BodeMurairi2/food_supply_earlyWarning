@@ -78,6 +78,24 @@ export interface Historical {
   metrics: { all_rows: Scores; real_surveys: Scores; persistence_real_surveys: Scores }
 }
 
+export interface ClassScores {
+  label: Risk
+  precision: number
+  recall: number
+  f1: number
+  observed: number
+  predicted: number
+  correct: number
+  roc_auc: number | null
+}
+
+export interface ClassificationScores {
+  n: number
+  accuracy: number
+  macro: { precision: number; recall: number; f1: number; roc_auc: number | null }
+  classes: ClassScores[]
+}
+
 export interface Performance {
   evaluation_setup: string
   train: Scores
@@ -85,6 +103,7 @@ export interface Performance {
   test_real_surveys: Scores
   persistence_real_surveys: Scores
   risk_class_agreement_real_surveys: number
+  classification_real_surveys: ClassificationScores
   by_year: (Scores & { year: number; observation_type: string })[]
   by_province_real_surveys: (Scores & { province: string })[]
   caveats: string[]

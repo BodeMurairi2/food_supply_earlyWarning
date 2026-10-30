@@ -18,7 +18,7 @@ def build_context() -> AppContext:
     dataset = Dataset()
     models = ModelRegistry(dataset)
     # Precompute predictions and SHAP values once, so requests stay fast.
-    _ = models.historical, models.forecasts
+    _ = models.historical, models.forecasts, models.historical_class_probabilities
     return AppContext(dataset, models)
 
 
