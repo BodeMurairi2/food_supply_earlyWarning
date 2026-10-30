@@ -8,6 +8,19 @@ from api.model.explainer import contribution_items
 from api.model.metrics import classification_scores, risk_class, scores
 
 
+def _evaluation_sets(ctx, rows):
+    """The same scores for each evaluation set: all test years, both real surveys, and each survey alone."""
+    survey = rows[rows["is_real_survey"]]
+    sets = [("test", "Test data 2021–2024", rows), ("surveys", "Real surveys 2021 & 2024", survey),
+            ("survey_2021", "Real survey 2021", survey[survey["year"] == 2021]),
+            ("survey_2024", "Real survey 2024", survey[survey["year"] == 2024])]
+    probabilities = ctx.models.historical_class_probabilities
+    return [{"key": key, "label": label, "regression": scores(d["observed"], d["predicted"]),
+             "last_survey": scores(d["observed"], d["persistence"]),
+             "classification": classification_scores(d["observed_risk"], d["predicted_risk"], probabilities.loc[d.index])}
+            for key, label, d in sets]
+
+
 def performance(ctx):
     rows, _ = ctx.models.historical
     survey = rows[rows["is_real_survey"]]
@@ -25,10 +38,7 @@ def performance(ctx):
         "persistence_all_rows": scores(rows["observed"], rows["persistence"]),
         "persistence_real_surveys": scores(survey["observed"], survey["persistence"]),
         "risk_class_agreement_real_surveys": clean(class_agreement),
-        "classification_test_all_rows": classification_scores(
-            rows["observed_risk"], rows["predicted_risk"], ctx.models.historical_class_probabilities),
-        "classification_real_surveys": classification_scores(
-            survey["observed_risk"], survey["predicted_risk"], ctx.models.historical_class_probabilities.loc[survey.index]),
+        "datasets": _evaluation_sets(ctx, rows),
         "by_year": by_year,
         "by_province_real_surveys": by_province,
         "caveats": [
