@@ -68,7 +68,7 @@ export default function Forecasts() {
 
   return (
     <>
-      <PageHeader title="Forecasts (2025–2026)" subtitle="Random forest retrained on 2006–2024. No survey exists yet for these years.">
+      <PageHeader title="Forecasts (2025–2026)">
         <div className="flex flex-wrap gap-3"><LocationFilters value={loc} onChange={setLoc} /></div>
       </PageHeader>
 
