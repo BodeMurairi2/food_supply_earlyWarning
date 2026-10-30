@@ -125,15 +125,17 @@ async def run_assistant(kind, context):
     """The longer explanation on the Prediction Lab, Forecasts and Visualizations pages."""
     _require_keys()
     output, sources, searches = await _run_agent(ASSISTANT_INSTRUCTION, build_assistant_message(kind, context), AssistantOutput)
-    briefing, _ = clean_briefing(output, {s["id"] for s in sources})
+    briefing, invalid = clean_briefing(output, {s["id"] for s in sources})
 
     ordered = pick_sources(briefing, sources, config.AI_ASSISTANT_MAX_SOURCES)
     briefing, dropped = clean_briefing(output, {s["id"] for s in ordered})
     cited = {i for sec in ("evidence", "actions") for x in briefing[sec] for i in x["sources"]}
 
     warnings = []
-    if dropped:
-        warnings.append(f"{dropped} evidence item(s) without a valid source were removed.")
+    if invalid:
+        warnings.append(f"{invalid} evidence item(s) without a valid source were removed.")
+    if dropped > invalid:
+        warnings.append(f"{dropped - invalid} further evidence item(s) were left out to keep to {config.AI_ASSISTANT_MAX_SOURCES} sources.")
     if not ordered:
         warnings.append("No web results were retrieved; this explanation relies on the model and the dataset only.")
     return {

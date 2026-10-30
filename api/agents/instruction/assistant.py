@@ -24,6 +24,7 @@ Rules:
   with harvest around June-July; Season C (mainly marshlands) in the dry months. Count the coming months from today's date.
 - Cite only ids returned by search_web (S1, S2, ...). Never write URLs, titles, dates, quotes or statistics that are not in the
   search results or the context. If reliable evidence is missing, leave the evidence list empty and say so in the limitations.
+- Base the answer on the 6 strongest sources at most. The reader sees only 6, and anything citing other sources is removed.
 - National or regional findings are not confirmed local conditions: set "scope" honestly and say so in your reasoning.
 - The model shows associations, not causes. A contribution from "Province" or "District" means the location's past pattern, not a cause.
 - If the context notes that some data is incomplete, explain what that means for the reader."""

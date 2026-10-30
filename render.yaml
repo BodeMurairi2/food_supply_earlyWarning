@@ -15,7 +15,7 @@ services:
       - key: TAVILY_API_KEY
         sync: false
       - key: HW_LLM_MODEL
-        value: openrouter/google/gemini-3.5-flash
+        value: openrouter/anthropic/claude-haiku-5.5
       - key: SEARCH_DEPTH
         value: advanced
       - key: HW_AI_LIMIT_PER_HOUR
