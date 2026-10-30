@@ -7,6 +7,7 @@ import { api } from '../services/api'
 import type { EvaluationSet } from '../types/api'
 
 const score = (v: number | null | undefined, digits = 3) => (v === null || v === undefined ? '—' : v.toFixed(digits))
+const percent = (v: number | null | undefined) => (v === null || v === undefined ? '—' : `${(v * 100).toFixed(1)}%`)
 
 /** One row per metric, one column per evaluation set. */
 function CompareTable({ sets, rows }: { sets: EvaluationSet[]; rows: { label: string; value: (s: EvaluationSet) => string }[] }) {
@@ -48,18 +49,18 @@ function ClassTable({ set }: { set: EvaluationSet }) {
             {classes.map((c) => (
               <tr key={c.label} className="border-b border-gray-50">
                 <td className="td"><RiskBadge risk={c.label} /></td>
-                <td className="td text-right tabular-nums">{score(c.precision)}</td>
-                <td className="td text-right tabular-nums">{score(c.recall)}</td>
-                <td className="td text-right tabular-nums">{score(c.f1)}</td>
-                <td className="td text-right tabular-nums">{score(c.roc_auc)}</td>
+                <td className="td text-right tabular-nums">{percent(c.precision)}</td>
+                <td className="td text-right tabular-nums">{percent(c.recall)}</td>
+                <td className="td text-right tabular-nums">{percent(c.f1)}</td>
+                <td className="td text-right tabular-nums">{percent(c.roc_auc)}</td>
               </tr>
             ))}
             <tr className="font-medium text-gray-900">
               <td className="td">Average</td>
-              <td className="td text-right tabular-nums">{score(macro.precision)}</td>
-              <td className="td text-right tabular-nums">{score(macro.recall)}</td>
-              <td className="td text-right tabular-nums">{score(macro.f1)}</td>
-              <td className="td text-right tabular-nums">{score(macro.roc_auc)}</td>
+              <td className="td text-right tabular-nums">{percent(macro.precision)}</td>
+              <td className="td text-right tabular-nums">{percent(macro.recall)}</td>
+              <td className="td text-right tabular-nums">{percent(macro.f1)}</td>
+              <td className="td text-right tabular-nums">{percent(macro.roc_auc)}</td>
             </tr>
           </tbody>
         </table>
@@ -98,11 +99,11 @@ export default function ModelPerformance() {
 
           <Card title="Predicting the risk class" subtitle="Average across Low, Medium and High">
             <CompareTable sets={data.datasets} rows={[
-              { label: 'Accuracy', value: (s) => score(s.classification.accuracy) },
-              { label: 'Precision', value: (s) => score(s.classification.macro.precision) },
-              { label: 'Recall', value: (s) => score(s.classification.macro.recall) },
-              { label: 'F1', value: (s) => score(s.classification.macro.f1) },
-              { label: 'ROC-AUC', value: (s) => score(s.classification.macro.roc_auc) },
+              { label: 'Accuracy', value: (s) => percent(s.classification.accuracy) },
+              { label: 'Precision', value: (s) => percent(s.classification.macro.precision) },
+              { label: 'Recall', value: (s) => percent(s.classification.macro.recall) },
+              { label: 'F1', value: (s) => percent(s.classification.macro.f1) },
+              { label: 'ROC-AUC', value: (s) => percent(s.classification.macro.roc_auc) },
             ]} />
           </Card>
 
