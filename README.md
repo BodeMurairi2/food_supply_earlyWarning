@@ -32,6 +32,30 @@ food_security_dataset.csv  final modelling table
 runs/                      TensorBoard logs of the experiments
 catboost_logs/             CatBoost training logs
 documentation/             pipeline documentation
+api/                       FastAPI backend (see below)
+frontend/                  React frontend
+models/                    saved random forest models
+```
+
+The backend reads top to bottom: a request goes through a router, a controller and a service.
+
+```
+api/
+  main.py            creates the app, adds the routers
+  config.py          paths, thresholds, feature labels, AI settings
+  dependencies.py    the dataset and models shared by every request
+  routers/           URLs and query parameters, one file per area
+  controllers/       call the services, turn errors into HTTP responses, AI cache and rate limit
+  services/          the logic behind each page
+  data/              loads the dataset and boundaries, JSON helpers
+  model/             loads the saved models, SHAP explanations, risk classes and scores
+  agents/            AI Analyst: analyst.py runs the agent, parsing.py checks its answer
+    instruction/     system instruction
+    prompt/          user message
+    tool/            web search
+    memory/          session and analysis cache
+  schemas/           request and response models
+  assets/            district boundaries
 ```
 
 ## Setup
