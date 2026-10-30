@@ -1,5 +1,6 @@
 import { Crosshair, Gauge, Scale, Target } from 'lucide-react'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import MetricGuide from '../components/MetricGuide'
 import { Card, ErrorState, Loading, PageHeader, RiskBadge, StatCard } from '../components/ui'
 import { useApi } from '../hooks/useApi'
 import { num, pct } from '../lib/format'
@@ -87,6 +88,8 @@ export default function ModelPerformance() {
             <StatCard icon={<Gauge className="h-5 w-5" />} tone="amber" label="R²" value={score(test.regression.r2, 2)} />
             <StatCard icon={<Crosshair className="h-5 w-5" />} tone="danger" label="Risk class accuracy" value={pct(test.classification.accuracy * 100, 0)} />
           </div>
+
+          <MetricGuide set={test} />
 
           <Card title="Predicting the percentage" subtitle="Error in percentage points">
             <CompareTable sets={data.datasets} rows={[
