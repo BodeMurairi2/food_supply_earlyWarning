@@ -85,17 +85,17 @@ export default function ModelPerformance() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard icon={<Target className="h-5 w-5" />} label="Average error (MAE)" value={`${num(test.regression.mae, 2)} pts`} />
             <StatCard icon={<Scale className="h-5 w-5" />} tone="blue" label="RMSE" value={`${num(test.regression.rmse, 2)} pts`} />
-            <StatCard icon={<Gauge className="h-5 w-5" />} tone="amber" label="R²" value={score(test.regression.r2, 2)} />
+            <StatCard icon={<Gauge className="h-5 w-5" />} tone="amber" label="R²" value={percent(test.regression.r2)} />
             <StatCard icon={<Crosshair className="h-5 w-5" />} tone="danger" label="Risk class accuracy" value={pct(test.classification.accuracy * 100, 0)} />
           </div>
 
-          <MetricGuide set={test} />
+          <MetricGuide sets={data.datasets} />
 
           <Card title="Predicting the percentage" subtitle="Error in percentage points">
             <CompareTable sets={data.datasets} rows={[
               { label: 'MAE', value: (s) => score(s.regression.mae, 2) },
               { label: 'RMSE', value: (s) => score(s.regression.rmse, 2) },
-              { label: 'R²', value: (s) => score(s.regression.r2, 2) },
+              { label: 'R²', value: (s) => percent(s.regression.r2) },
               { label: 'MAE when copying the last survey', value: (s) => score(s.last_survey.mae, 2) },
             ]} />
           </Card>

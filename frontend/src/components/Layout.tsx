@@ -7,11 +7,11 @@ import { ErrorState } from './ui'
 const NAV: { to: string; label: string; icon: typeof Bot; end?: boolean; soon?: boolean }[] = [
   { to: '/', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/historical', label: 'Historical Analysis', icon: History },
-  { to: '/model-performance', label: 'Model Performance', icon: Gauge },
   { to: '/forecasts', label: 'Forecasts (2025–2026)', icon: LineChart },
   { to: '/visualizations', label: 'Visualizations', icon: BarChart3 },
   { to: '/prediction-lab', label: 'Prediction Lab', icon: FlaskConical },
   { to: '/ai-analyst', label: 'AI Analyst', icon: Bot },
+  { to: '/model-performance', label: 'Model Performance', icon: Gauge },
 ]
 
 function Sidebar({ onNavigate }: { onNavigate?: () => void }) {

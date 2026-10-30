@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from api import config
 from api.controllers import ai as controller
 from api.dependencies import AppContext, get_context
-from api.schemas import AnalyzeRequest, SearchRequest
+from api.schemas import AnalyzeRequest, AssistantRequest, SearchRequest
 
 router = APIRouter(prefix="/ai")
 
@@ -27,3 +27,8 @@ async def search(req: SearchRequest, request: Request):
 @router.post("/analyze")
 async def analyze(req: AnalyzeRequest, request: Request, ctx: AppContext = Depends(get_context)):
     return await controller.analyze(ctx, req, request)
+
+
+@router.post("/assistant")
+async def assistant(req: AssistantRequest, request: Request, ctx: AppContext = Depends(get_context)):
+    return await controller.assistant(ctx, req, request)

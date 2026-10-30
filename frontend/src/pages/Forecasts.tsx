@@ -1,7 +1,7 @@
-import { ArrowDown, ArrowUp, ArrowUpDown, Sparkles } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import AIAssistant from '../components/AIAssistant'
 import ContributionChart from '../components/ContributionChart'
 import { LocationFilters, type LocationValue } from '../components/LocationFilters'
 import { Card, EmptyState, ErrorState, Loading, Note, PageHeader, Pagination, RiskBadge } from '../components/ui'
@@ -144,17 +144,11 @@ export default function Forecasts() {
           <Card title={selected ? `Why this forecast for ${selected}?` : 'Forecast drivers'}
             subtitle={expl.data && !expl.loading ? `Predicted ${pct(expl.data.prediction)} = average ${pct(expl.data.base_value)} + contributions below` : undefined}
             actions={selected && (
-              <div className="flex items-center gap-2">
-              <Link to={`/ai-analyst?district=${encodeURIComponent(selected)}&year=${explainYear}`}
-                className="inline-flex items-center gap-1 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1 text-xs font-medium text-violet-700 hover:bg-violet-100">
-                <Sparkles className="h-3.5 w-3.5" /> AI analysis
-              </Link>
               <div className="flex rounded-lg border border-gray-200 p-0.5 text-xs">
                 {[2025, 2026].map((y) => (
                   <button key={y} onClick={() => setExplainYear(y)}
                     className={`rounded-md px-3 py-1 ${explainYear === y ? 'bg-brand text-white' : 'text-gray-600'}`}>{y}</button>
                 ))}
-              </div>
               </div>
             )}>
             {!selected && <EmptyState message="Pick a district in the table." />}
@@ -163,6 +157,11 @@ export default function Forecasts() {
             {selected && expl.data && !expl.loading && <ContributionChart contributions={expl.data.contributions} />}
           </Card>
         </div>
+
+        {selected && (
+          <AIAssistant key={`${selected}-${explainYear}`} title={`AI assistant: ${selected}, ${explainYear} forecast`}
+            request={{ kind: 'forecast', district: selected, year: explainYear }} />
+        )}
 
         {fc.data && <Note>{fc.data.note}</Note>}
       </div>

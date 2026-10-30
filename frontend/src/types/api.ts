@@ -295,3 +295,43 @@ export interface AIResult {
   warnings: string[]
   cached: boolean
 }
+
+export interface AssistantOutlook {
+  assessment: string[]
+  watch_for: string[]
+  scenarios: { scenario: string; implication: string }[]
+}
+
+export interface AssistantBriefing {
+  headline: string
+  what_it_means: string[]
+  drivers: { factor: string; direction: 'raises' | 'lowers' | 'neutral'; explanation: string }[]
+  evidence: { finding: string; sources: string[]; scope: string; credibility: string; relevance: string }[]
+  outlook_3_6_months: AssistantOutlook
+  outlook_1_year: AssistantOutlook
+  actions: { action: string; who?: string; when?: string; rationale: string; sources: string[] }[]
+  limitations: string[]
+}
+
+export interface AssistantRequest {
+  kind: 'prediction' | 'forecast' | 'visualization'
+  district?: string
+  province?: string
+  year?: number
+  inputs?: Record<string, number | null>
+  variable?: string
+  level?: 'province' | 'district'
+  start_year?: number
+  end_year?: number
+}
+
+export interface AssistantResult {
+  kind: string
+  briefing: AssistantBriefing
+  sources: AISource[]
+  searches: string[]
+  llm_model: string
+  generated_at: string
+  warnings: string[]
+  cached: boolean
+}

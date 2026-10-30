@@ -127,7 +127,9 @@ if SEARCH_DEPTH not in {"basic", "advanced", "fast", "ultra-fast"}:
     SEARCH_DEPTH = "basic"
 AI_MAX_SEARCHES = 4          # web searches the agent may run per analysis
 AI_RESULTS_PER_SEARCH = 5
-AI_TIMEOUT_S = 150           # whole analysis, including searches
+AI_TIMEOUT_S = 240           # whole analysis, including searches
+AI_ASSISTANT_MAX_TOKENS = 12000   # long answers on the Prediction Lab, Forecasts and Visualizations pages
+AI_ASSISTANT_MAX_SOURCES = 6
 # Limits for the public demo (cached answers do not count).
 AI_LIMIT_PER_CLIENT_HOUR = int(os.getenv("HW_AI_LIMIT_PER_HOUR", "5"))
 AI_LIMIT_PER_DAY = int(os.getenv("HW_AI_LIMIT_PER_DAY", "60"))
