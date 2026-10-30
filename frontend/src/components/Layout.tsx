@@ -1,4 +1,4 @@
-import { BarChart3, Bot, FlaskConical, History, LayoutDashboard, LineChart, Menu, Sprout, X } from 'lucide-react'
+import { BarChart3, Bot, FlaskConical, Gauge, History, LayoutDashboard, LineChart, Menu, Sprout, X } from 'lucide-react'
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAppData } from '../hooks/AppData'
@@ -7,6 +7,7 @@ import { ErrorState } from './ui'
 const NAV: { to: string; label: string; icon: typeof Bot; end?: boolean; soon?: boolean }[] = [
   { to: '/', label: 'Overview', icon: LayoutDashboard, end: true },
   { to: '/historical', label: 'Historical Analysis', icon: History },
+  { to: '/model-performance', label: 'Model Performance', icon: Gauge },
   { to: '/forecasts', label: 'Forecasts (2025–2026)', icon: LineChart },
   { to: '/visualizations', label: 'Visualizations', icon: BarChart3 },
   { to: '/prediction-lab', label: 'Prediction Lab', icon: FlaskConical },

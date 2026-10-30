@@ -4,6 +4,7 @@ import AIAnalyst from './pages/AIAnalyst'
 import { AppDataProvider } from './hooks/AppData'
 import Forecasts from './pages/Forecasts'
 import Historical from './pages/Historical'
+import ModelPerformance from './pages/ModelPerformance'
 import NotFound from './pages/NotFound'
 import Overview from './pages/Overview'
 import PredictionLab from './pages/PredictionLab'
@@ -17,6 +18,7 @@ export default function App() {
           <Route element={<Layout />}>
             <Route index element={<Overview />} />
             <Route path="historical" element={<Historical />} />
+            <Route path="model-performance" element={<ModelPerformance />} />
             <Route path="forecasts" element={<Forecasts />} />
             <Route path="prediction-lab" element={<PredictionLab />} />
             <Route path="visualizations" element={<Visualizations />} />

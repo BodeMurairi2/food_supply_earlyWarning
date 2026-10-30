@@ -1,4 +1,3 @@
-import { Gauge, Scale, Target, TrendingDown } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import {
   Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis,
@@ -6,69 +5,14 @@ import {
 } from 'recharts'
 import ContributionChart from '../components/ContributionChart'
 import { LocationFilters, YearSelect, type LocationValue } from '../components/LocationFilters'
-import { Card, EmptyState, ErrorState, Loading, Note, PageHeader, Pagination, RiskBadge, StatCard } from '../components/ui'
+import { Card, EmptyState, ErrorState, Loading, PageHeader, Pagination, RiskBadge } from '../components/ui'
 import { useApi } from '../hooks/useApi'
 import { num, pct, shortProvince, signed } from '../lib/format'
 import { api } from '../services/api'
-import type { ClassificationScores, HistoricalRow } from '../types/api'
+import type { HistoricalRow } from '../types/api'
 
 const PAGE_SIZE = 15
 const TEST_YEARS = [2021, 2022, 2023, 2024]
-
-/** How well the predicted percentages land in the right risk class, on the 2021-2024 test data. */
-function RiskClassCard({ scores }: { scores: ClassificationScores }) {
-  const high = scores.classes.find((c) => c.label === 'High')
-  return (
-    <Card title="Risk class performance on test data (2021–2024)"
-      subtitle={`Predictions turned into Low, Medium and High (${scores.n} district-years). Accuracy ${num(scores.accuracy, 3)}. 2021 and 2024 are real surveys; 2022–2023 are interpolated between them.`}>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px]">
-          <thead>
-            <tr className="border-b border-gray-100">
-              <th className="th">Class</th><th className="th text-right">Precision</th><th className="th text-right">Recall</th>
-              <th className="th text-right">F1</th><th className="th text-right">ROC-AUC</th>
-              <th className="th text-right">Correct / observed</th><th className="th text-right">Predicted</th>
-            </tr>
-          </thead>
-          <tbody>
-            {scores.classes.map((c) => (
-              <tr key={c.label} className="border-b border-gray-50">
-                <td className="td"><RiskBadge risk={c.label} /></td>
-                <td className="td text-right tabular-nums">{c.precision.toFixed(3)}</td>
-                <td className="td text-right tabular-nums">{c.recall.toFixed(3)}</td>
-                <td className="td text-right tabular-nums">{c.f1.toFixed(3)}</td>
-                <td className="td text-right tabular-nums">{c.roc_auc?.toFixed(3) ?? '—'}</td>
-                <td className="td text-right tabular-nums">{c.correct} / {c.observed}</td>
-                <td className="td text-right tabular-nums">{c.predicted}</td>
-              </tr>
-            ))}
-            <tr className="font-medium">
-              <td className="td text-gray-900">Average of classes</td>
-              <td className="td text-right tabular-nums text-gray-900">{scores.macro.precision.toFixed(3)}</td>
-              <td className="td text-right tabular-nums text-gray-900">{scores.macro.recall.toFixed(3)}</td>
-              <td className="td text-right tabular-nums text-gray-900">{scores.macro.f1.toFixed(3)}</td>
-              <td className="td text-right tabular-nums text-gray-900">{scores.macro.roc_auc?.toFixed(3) ?? '—'}</td>
-              <td className="td" /><td className="td" />
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div className="mt-3 space-y-2">
-        {high && (
-          <Note>
-            High districts are often missed: the model caught {high.correct} of {high.observed} in these years and labelled most of the
-            others Medium. Read the percentage and the ranking as well as the label, and treat districts near 30% as a warning too.
-            With only {high.observed} High districts, these figures can move a lot.
-          </Note>
-        )}
-        <Note>
-          Low, Medium and High are illustrative thresholds (15% and 30%), not official NISR categories. ROC-AUC measures how well districts
-          are ranked for each class, using the share of the forest's trees that predict that class.
-        </Note>
-      </div>
-    </Card>
-  )
-}
 
 export default function Historical() {
   const [loc, setLoc] = useState<LocationValue>({ province: '', district: '' })
@@ -77,7 +21,6 @@ export default function Historical() {
   const [selected, setSelected] = useState<HistoricalRow | null>(null)
 
   const hist = useApi(() => api.historical({ province: loc.province, district: loc.district, year: year === '' ? null : year }), [loc.province, loc.district, year])
-  const perf = useApi(api.performance, [])
   const imp = useApi(() => api.featureImportance('evaluation'), [])
   const expl = useApi(() => api.explain(selected!.district, selected!.year), [selected?.district, selected?.year], !!selected)
 
@@ -92,7 +35,6 @@ export default function Historical() {
   }), [rows])
   const maxAxis = Math.ceil(Math.max(10, ...rows.flatMap((r) => [r.observed, r.predicted])) / 10) * 10
 
-  const p = perf.data
   return (
     <>
       <PageHeader title="Historical Analysis" subtitle="How the model did on 2021–2024, years it never saw in training (trained on 2006–2020)">
@@ -103,27 +45,11 @@ export default function Historical() {
       </PageHeader>
 
       <div className="space-y-6">
-        {perf.error && <ErrorState message={perf.error} onRetry={perf.reload} />}
-        {p && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard icon={<Target className="h-5 w-5" />} label="MAE on test data (2021–2024)"
-              value={`${num(p.test_all_rows.mae, 2)} pts`} hint={`Persistence baseline ${num(p.persistence_all_rows.mae, 2)} pts`} />
-            <StatCard icon={<Scale className="h-5 w-5" />} tone="blue" label="RMSE on test data"
-              value={`${num(p.test_all_rows.rmse, 2)} pts`} hint={`Persistence ${num(p.persistence_all_rows.rmse, 2)} pts`} />
-            <StatCard icon={<Gauge className="h-5 w-5" />} tone="amber" label="R² on test data"
-              value={num(p.test_all_rows.r2, 3)} hint={`Persistence ${num(p.persistence_all_rows.r2, 3)} · n = ${p.test_all_rows.n}`} />
-            <StatCard icon={<TrendingDown className="h-5 w-5" />} tone="danger" label="Risk class accuracy"
-              value={pct(p.classification_test_all_rows.accuracy * 100, 0)} hint="Low / Medium / High, test data" />
-          </div>
-        )}
-
-        {p && <RiskClassCard scores={p.classification_test_all_rows} />}
-
         {hist.error && <ErrorState message={hist.error} onRetry={hist.reload} />}
         {hist.loading && !hist.data && <Loading />}
         {hist.data && (
           <>
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+            <div>
               <Card title="Observed vs predicted" subtitle="Each dot is one district-year. Dots on the line are perfect predictions.">
                 {rows.length === 0 ? <EmptyState message="No rows for this selection." /> : (
                   <ResponsiveContainer width="100%" height={300}>
@@ -151,21 +77,6 @@ export default function Historical() {
                       <Scatter isAnimationActive={false} name="Real survey" data={scatter.real} fill="#059669" onClick={(d) => setSelected(d as unknown as HistoricalRow)} />
                       <Scatter isAnimationActive={false} name="Interpolated year" data={scatter.interp} fill="#9ca3af" fillOpacity={0.6} onClick={(d) => setSelected(d as unknown as HistoricalRow)} />
                     </ScatterChart>
-                  </ResponsiveContainer>
-                )}
-              </Card>
-
-              <Card title="Error by year" subtitle="Mean absolute error in percentage points">
-                {p && (
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={p.by_year} margin={{ top: 8, right: 16, bottom: 0, left: 0 }}>
-                      <CartesianGrid stroke="#eef0ef" vertical={false} />
-                      <XAxis dataKey="year" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} />
-                      <Tooltip formatter={(v: number) => `${num(v, 2)} pts`}
-                        labelFormatter={(y) => `${y} (${p.by_year.find((b) => b.year === y)?.observation_type ?? ''})`} />
-                      <Bar isAnimationActive={false} dataKey="mae" name="MAE" fill="#059669" radius={[4, 4, 0, 0]} />
-                    </BarChart>
                   </ResponsiveContainer>
                 )}
               </Card>
@@ -203,11 +114,6 @@ export default function Historical() {
                     </table>
                   </div>
                   <Pagination page={page} pages={pages} onChange={setPage} total={rows.length} pageSize={PAGE_SIZE} />
-                  {hist.data.metrics.all_rows.n > 0 && (
-                    <p className="mt-3 text-xs text-gray-500">
-                      This selection: MAE {num(hist.data.metrics.all_rows.mae, 2)} pts on {hist.data.metrics.all_rows.n} rows.
-                    </p>
-                  )}
                 </>
               )}
             </Card>
@@ -240,7 +146,6 @@ export default function Historical() {
           </Card>
         </div>
 
-        {p && <Note>{p.caveats.join(' ')}</Note>}
       </div>
     </>
   )
