@@ -4,6 +4,7 @@ import {
   Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, ReferenceArea, ReferenceLine, ResponsiveContainer,
   Tooltip, XAxis, YAxis,
 } from 'recharts'
+import AIAssistant from '../components/AIAssistant'
 import { LocationFilters, YearSelect, type LocationValue } from '../components/LocationFilters'
 import { Card, EmptyState, ErrorState, Loading, Note, PageHeader } from '../components/ui'
 import { useApi } from '../hooks/useApi'
@@ -265,6 +266,11 @@ export default function Visualizations() {
             )}
             {profile.data && <div className="mt-4 space-y-2">{profile.data.notes.map((n) => <Note key={n}>{n}</Note>)}</div>}
           </Card>
+
+          <AIAssistant key={JSON.stringify([variable.key, level, loc.province, loc.district, startYear, endYear])}
+            title={`AI assistant: ${variable.label.toLowerCase()}${loc.district || loc.province ? `, ${loc.district || loc.province}` : ''}`}
+            disabledReason={loc.province || loc.district ? undefined : 'Select a province or a district above to ask the AI assistant.'}
+            request={{ kind: 'visualization', variable: variable.key, level, province: loc.province || undefined, district: loc.district || undefined, start_year: startYear, end_year: endYear }} />
 
           <Note>{vars.data.note}</Note>
         </div>

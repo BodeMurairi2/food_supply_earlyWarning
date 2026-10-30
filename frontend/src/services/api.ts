@@ -1,5 +1,5 @@
 import type {
-  AIContext, AIResult, AIStatus,
+  AIContext, AIResult, AIStatus, AssistantRequest, AssistantResult,
   DistrictSeries, Explanation, FeatureImportance, Forecasts, Historical, Locations, Metadata, Overview,
   Performance, PredictDefaults, PredictResult, VizProfile, VizTrends, VizVariables,
 } from '../types/api'
@@ -63,6 +63,8 @@ export const api = {
   aiContext: (district: string, year: number) => request<AIContext>(`/ai/context${query({ district, year })}`),
   aiAnalyze: (body: { district: string; year: number; question?: string }) =>
     request<AIResult>('/ai/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
+  aiAssistant: (body: AssistantRequest) =>
+    request<AssistantResult>('/ai/assistant', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
   predict: (body: { district: string; year: number; inputs: Record<string, number | null> }) =>
     request<PredictResult>('/predict', {
       method: 'POST',
