@@ -3,6 +3,7 @@ import json
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import ValidationError
 from google.adk.models.base_llm import BaseLlm
 from google.adk.models.llm_response import LlmResponse
 from google.genai import types
@@ -12,6 +13,7 @@ from api.agents.memory.cache import analysis_cache
 from api.agents.tool import search as search_tool
 from api.controllers import ai as ai_controller
 from api.main import app
+from api.schemas import AssistantOutput
 from api.services.ratelimit import RateLimiter
 
 FAKE_RESULTS = [
@@ -159,3 +161,76 @@ def test_assistant_pages(assistant_client, body):
 ])
 def test_assistant_rejects_bad_requests(assistant_client, body, status):
     assert assistant_client.post("/api/ai/assistant", json=body).status_code == status
+
+
+class RepairingLlm(BaseLlm):
+    """Search, then a broken answer. The repair call (no tools) gets `repair_answer`."""
+    repair_answer: str = ""
+    calls: list = []
+
+    async def generate_content_async(self, llm_request, stream=False):
+        text = "".join(p.text or "" for c in llm_request.contents for p in (c.parts or []))
+        self.calls.append({"tools": sorted(llm_request.tools_dict), "schema": llm_request.config.response_schema})
+        answered = any(p.function_response for c in llm_request.contents for p in (c.parts or []))
+        if text.startswith("DRAFT:"):
+            part = types.Part(text=self.repair_answer)
+        elif not answered:
+            part = types.Part(function_call=types.FunctionCall(name="search_web", args={"query": "Rwanda outlook"}))
+        else:
+            part = types.Part(text='{"headline": "cut off mid-sent')
+        yield LlmResponse(content=types.Content(role="model", parts=[part]))
+
+
+def _repairing_client(monkeypatch, repair_answer):
+    llm = RepairingLlm(model="scripted", repair_answer=repair_answer, calls=[])
+    monkeypatch.setattr(analyst, "LiteLlm", lambda model: llm)
+    return llm
+
+
+def test_invalid_answer_is_repaired_without_new_searches(assistant_client, monkeypatch):
+    llm = _repairing_client(monkeypatch, json.dumps(BRIEFING))
+    r = assistant_client.post("/api/ai/assistant", json={"kind": "forecast", "district": "Huye", "year": 2026})
+    assert r.status_code == 200, r.text
+    assert r.json()["searches"] == ["Rwanda outlook"]  # the repair call did not search again
+    assert r.json()["briefing"]["headline"] == BRIEFING["headline"]
+    # The research call must finish through the schema tool; the repair call has no tools and uses the schema directly.
+    assert {"search_web", "set_model_response"} <= set(llm.calls[0]["tools"])
+    assert llm.calls[-1]["tools"] == [] and llm.calls[-1]["schema"] is AssistantOutput
+
+
+def test_answer_that_cannot_be_repaired_is_a_clear_502(assistant_client, monkeypatch):
+    _repairing_client(monkeypatch, "still not valid")
+    r = assistant_client.post("/api/ai/assistant", json={"kind": "forecast", "district": "Huye", "year": 2025})
+    assert r.status_code == 502
+    assert "could not produce a complete answer" in r.json()["detail"]
+    assert "JSON" not in r.json()["detail"]
+    # A failed answer is not cached.
+    assert not any("Huye" in str(k) for k in analysis_cache)
+
+
+def test_schema_rejects_wrong_shape():
+    with pytest.raises(ValidationError):
+        AssistantOutput.model_validate({**BRIEFING, "drivers": [{"factor": "Province", "direction": "sideways", "explanation": "x"}]})
+    with pytest.raises(ValidationError):
+        AssistantOutput.model_validate({k: v for k, v in BRIEFING.items() if k != "headline"})
+
+
+def test_source_cap_keeps_a_source_for_every_evidence_item():
+    sources = [{"id": f"S{i}"} for i in range(1, 11)]
+    briefing = {
+        "evidence": [{"sources": [f"S{i}", f"S{i + 1}"]} for i in (1, 3, 5, 7, 9)],  # 10 cited sources, 5 items
+        "actions": [{"sources": ["S2"]}],
+    }
+    kept = {s["id"] for s in analyst.pick_sources(briefing, sources, 6)}
+    assert len(kept) == 6
+    assert all(set(item["sources"]) & kept for item in briefing["evidence"])
+    # Uncited sources come last.
+    assert [s["id"] for s in analyst.pick_sources({"evidence": [], "actions": [{"sources": ["S4"]}]}, sources, 2)] == ["S4", "S1"]
+
+
+def test_assistant_keeps_evidence_when_more_than_six_sources_are_cited(assistant_client, monkeypatch):
+    evidence = [{"finding": f"Finding {i}", "sources": [f"S{i}"], "scope": "national", "credibility": "high", "relevance": "x"} for i in range(3, 9)]
+    monkeypatch.setitem(BRIEFING, "evidence", evidence)  # S3-S8 back the evidence, and the actions also cite S1 and S7
+    r = assistant_client.post("/api/ai/assistant", json={"kind": "forecast", "district": "Ngoma", "year": 2026}).json()
+    assert len(r["briefing"]["evidence"]) == 6 and r["warnings"] == []
+    assert {s["id"] for s in r["sources"]} == {f"S{i}" for i in range(3, 9)}

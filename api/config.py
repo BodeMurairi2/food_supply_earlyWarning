@@ -119,7 +119,7 @@ SAS_PARTIAL_YEARS = {2026: "2026 covers Seasons B and C of 2025 only; Season A 2
 
 # ---------- AI Analyst ----------
 # The LLM is reached through LiteLLM; an "openrouter/..." model uses OPENROUTER_API_KEY.
-LLM_MODEL = os.getenv("HW_LLM_MODEL", "openrouter/anthropic/claude-sonnet-5.5")
+LLM_MODEL = os.getenv("HW_LLM_MODEL", "openrouter/anthropic/claude-haiku-5.5")
 TAVILY_URL = "https://api.tavily.com/search"
 # Tavily search depth: "basic" (cheaper) or "advanced" (better results, more credits); also "fast", "ultra-fast".
 SEARCH_DEPTH = os.getenv("SEARCH_DEPTH", "basic").strip().lower()
@@ -128,7 +128,7 @@ if SEARCH_DEPTH not in {"basic", "advanced", "fast", "ultra-fast"}:
 AI_MAX_SEARCHES = 4          # web searches the agent may run per analysis
 AI_RESULTS_PER_SEARCH = 5
 AI_TIMEOUT_S = 240           # whole analysis, including searches
-AI_ASSISTANT_MAX_TOKENS = 12000   # long answers on the Prediction Lab, Forecasts and Visualizations pages
+AI_MAX_OUTPUT_TOKENS = 20000   # long answers; a low limit would cut the structured answer short
 AI_ASSISTANT_MAX_SOURCES = 6
 # Limits for the public demo (cached answers do not count).
 AI_LIMIT_PER_CLIENT_HOUR = int(os.getenv("HW_AI_LIMIT_PER_HOUR", "5"))
