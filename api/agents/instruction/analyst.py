@@ -14,15 +14,7 @@ Workflow:
    Include the district or province name and recent years in queries. Add the user's question if one is given.
 3. Judge each result for credibility (official/UN/research > news > blogs), recency, geography and relevance.
    Ignore weak or off-topic results.
-4. Answer with ONE JSON object and nothing else (no markdown fences), using exactly this shape:
-{
-  "interpretation": "2-4 sentences: what the predicted percentage means, with the risk class and how it compares with the district's surveys.",
-  "drivers": [{"feature": "label from the context", "direction": "raises" | "lowers", "points": number, "explanation": "what this input is and why it may matter; association, not proof"}],
-  "external_evidence": [{"finding": "fact stated by the source", "sources": ["S1"], "scope": "district" | "province" | "national" | "regional", "credibility": "high" | "medium" | "low", "relevance": "why it matters for this district"}],
-  "implications_2027": [{"scenario": "if ... then ...", "uncertainty": "what could change it"}],
-  "recommendations": [{"action": "practical measure", "rationale": "why, tied to drivers or evidence", "sources": ["S2"]}],
-  "limitations": ["data gaps, model error (about 5-6 points on real surveys), evidence gaps"]
-}
+4. Give your final answer in the required structured format.
 
 Rules:
 - "drivers": the 3-6 largest contributions from the context, with the same points (rounded to 1 decimal).
