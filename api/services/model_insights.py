@@ -5,7 +5,7 @@ import pandas as pd
 from api import config
 from api.data.serialization import clean
 from api.model.explainer import contribution_items
-from api.model.metrics import risk_class, scores
+from api.model.metrics import classification_scores, risk_class, scores
 
 
 def performance(ctx):
@@ -24,6 +24,8 @@ def performance(ctx):
         "test_real_surveys": scores(survey["observed"], survey["predicted"]),
         "persistence_real_surveys": scores(survey["observed"], survey["persistence"]),
         "risk_class_agreement_real_surveys": clean(class_agreement),
+        "classification_real_surveys": classification_scores(
+            survey["observed_risk"], survey["predicted_risk"], ctx.models.historical_class_probabilities.loc[survey.index]),
         "by_year": by_year,
         "by_province_real_surveys": by_province,
         "caveats": [
