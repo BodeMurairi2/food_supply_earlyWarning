@@ -8,7 +8,9 @@ from google.adk.models.llm_response import LlmResponse
 from google.genai import types
 
 from api.agents import analyst
-from api.main import _ai_cache, app
+from api.agents.memory.cache import analysis_cache
+from api.agents.tool import search as search_tool
+from api.main import app
 
 FAKE_RESULTS = [
     {"title": "Rwanda seasonal rainfall outlook", "url": "https://example.org/outlook", "snippet": "Below-normal rain expected.",
@@ -51,8 +53,8 @@ def client(monkeypatch):
     async def fake_search(query, max_results=5):
         return FAKE_RESULTS
 
-    monkeypatch.setattr(analyst, "tavily_search", fake_search)
-    _ai_cache.clear()
+    monkeypatch.setattr(search_tool, "tavily_search", fake_search)
+    analysis_cache.clear()
     with TestClient(app) as c:
         yield c
 
@@ -75,7 +77,7 @@ def test_analyze_runs_agent_and_keeps_only_real_citations(client):
 
 def test_analyze_without_keys_is_503(monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
-    _ai_cache.clear()
+    analysis_cache.clear()
     with TestClient(app) as c:
         r = c.post("/api/ai/analyze", json={"district": "Huye", "year": 2025})
     assert r.status_code == 503
