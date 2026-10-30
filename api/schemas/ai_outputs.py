@@ -23,35 +23,6 @@ class Evidence(BaseModel):
     relevance: str = Field(description="Why it matters for this area")
 
 
-# ---------- AI Analyst ----------
-class AnalystDriver(BaseModel):
-    feature: str = Field(description="Label from the context")
-    direction: Literal["raises", "lowers"]
-    points: float = Field(description="The contribution from the context, rounded to 1 decimal")
-    explanation: str = Field(description="What this input is and why it may matter; association, not proof")
-
-
-class AnalystScenario(BaseModel):
-    scenario: str = Field(description="If ... then ...")
-    uncertainty: str = Field(description="What could change it")
-
-
-class AnalystRecommendation(BaseModel):
-    action: str = Field(description="Practical measure")
-    rationale: str = Field(description="Why, tied to drivers or evidence")
-    sources: list[str] = Field(default_factory=list, description=SOURCE_IDS)
-
-
-class AnalystOutput(BaseModel):
-    interpretation: str = Field(description="2-4 sentences: what the predicted percentage means, with the risk class and how it compares with the district's surveys")
-    drivers: list[AnalystDriver] = Field(description="The 3-6 largest contributions from the context")
-    external_evidence: list[Evidence]
-    implications_2027: list[AnalystScenario]
-    recommendations: list[AnalystRecommendation]
-    limitations: Paragraphs = Field(description="Data gaps, model error (about 5-6 points on real surveys), evidence gaps")
-
-
-# ---------- AI assistant ----------
 class Driver(BaseModel):
     factor: str = Field(description="Name from the context")
     direction: Literal["raises", "lowers", "neutral"]

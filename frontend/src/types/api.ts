@@ -273,29 +273,6 @@ export interface AISource {
   cited: boolean
 }
 
-export interface AIAnalysis {
-  interpretation: string
-  drivers: { feature: string; direction: 'raises' | 'lowers'; points: number; explanation: string }[]
-  external_evidence: { finding: string; sources: string[]; scope: string; credibility: string; relevance: string }[]
-  implications_2027: { scenario: string; uncertainty: string }[]
-  recommendations: { action: string; rationale: string; sources: string[] }[]
-  limitations: string[]
-}
-
-export interface AIResult {
-  district: string
-  year: number
-  question: string | null
-  context: AIContext
-  analysis: AIAnalysis
-  sources: AISource[]
-  searches: string[]
-  llm_model: string
-  generated_at: string
-  warnings: string[]
-  cached: boolean
-}
-
 export interface AssistantOutlook {
   assessment: string[]
   watch_for: string[]
@@ -314,7 +291,7 @@ export interface AssistantBriefing {
 }
 
 export interface AssistantRequest {
-  kind: 'prediction' | 'forecast' | 'visualization'
+  kind: 'prediction' | 'historical' | 'forecast' | 'visualization'
   district?: string
   province?: string
   year?: number
@@ -323,6 +300,7 @@ export interface AssistantRequest {
   level?: 'province' | 'district'
   start_year?: number
   end_year?: number
+  question?: string
 }
 
 export interface AssistantResult {

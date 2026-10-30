@@ -28,13 +28,6 @@ def _real_evidence(items, source_ids):
     return kept, len(items) - len(kept)
 
 
-def clean_analysis(output, source_ids):
-    data = output.model_dump()
-    data["external_evidence"], dropped = _real_evidence(data["external_evidence"], source_ids)
-    data["recommendations"] = _keep_cited(data["recommendations"], source_ids)
-    return data, dropped
-
-
 def clean_briefing(output, source_ids):
     data = output.model_dump()
     data["evidence"], dropped = _real_evidence(data["evidence"], source_ids)
