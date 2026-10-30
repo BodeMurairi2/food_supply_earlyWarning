@@ -3,6 +3,7 @@ import {
   Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis,
   ReferenceLine,
 } from 'recharts'
+import AIAssistant from '../components/AIAssistant'
 import ContributionChart from '../components/ContributionChart'
 import { LocationFilters, YearSelect, type LocationValue } from '../components/LocationFilters'
 import { Card, EmptyState, ErrorState, Loading, PageHeader, Pagination, RiskBadge } from '../components/ui'
@@ -146,6 +147,11 @@ export default function Historical() {
           </Card>
         </div>
 
+
+        {selected && (
+          <AIAssistant key={`${selected.district}-${selected.year}`} title={`AI assistant: ${selected.district}, ${selected.year}`}
+            request={{ kind: 'historical', district: selected.district, year: selected.year }} />
+        )}
       </div>
     </>
   )

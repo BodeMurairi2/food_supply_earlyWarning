@@ -1,4 +1,4 @@
-"""AI Analyst: an ADK agent (LLM through LiteLLM/OpenRouter) that researches a model result with Tavily.
+"""The AI assistant: an ADK agent (LLM through LiteLLM/OpenRouter) that researches a result with Tavily.
 
 The numbers (prediction, risk, SHAP drivers, history) come from the saved model and the dataset and are
 passed to the agent as fixed context. The agent can only cite web results it actually received: every
@@ -16,15 +16,13 @@ from google.genai import types
 
 from api import config
 from api.agents.errors import AIUnavailable, AIUpstreamError
-from api.agents.instruction.analyst import INSTRUCTION
 from api.agents.instruction.assistant import ASSISTANT_INSTRUCTION
 from api.agents.instruction.repair import REPAIR_INSTRUCTION
 from api.agents.memory.session import APP_NAME, USER_ID, new_session
-from api.agents.parsing import InvalidOutput, clean_analysis, clean_briefing, parse_output
-from api.agents.prompt.analyst import build_message
-from api.agents.prompt.assistant import build_message as build_assistant_message
+from api.agents.parsing import InvalidOutput, clean_briefing, parse_output
+from api.agents.prompt.assistant import build_message
 from api.agents.tool.search import make_search_tool
-from api.schemas import AnalystOutput, AssistantOutput
+from api.schemas import AssistantOutput
 
 logger = logging.getLogger(__name__)
 
@@ -89,26 +87,6 @@ def _generated_at():
     return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-async def run_analysis(context, question=None):
-    _require_keys()
-    output, sources, searches = await _run_agent(INSTRUCTION, build_message(context, question), AnalystOutput)
-    analysis, dropped = clean_analysis(output, {s["id"] for s in sources})
-    cited = {i for sec in ("external_evidence", "recommendations") for x in analysis[sec] for i in x["sources"]}
-    warnings = []
-    if dropped:
-        warnings.append(f"{dropped} evidence item(s) without a valid source were removed.")
-    if not sources:
-        warnings.append("No web results were retrieved; the analysis relies on model output only.")
-    return {
-        "analysis": analysis,
-        "sources": [dict(s, cited=s["id"] in cited) for s in sources],
-        "searches": searches,
-        "llm_model": config.LLM_MODEL,
-        "generated_at": _generated_at(),
-        "warnings": warnings,
-    }
-
-
 def pick_sources(briefing, sources, limit):
     """Choose which sources to keep: one for each evidence item first, then other cited sources, then the rest."""
     wanted = []
@@ -121,10 +99,10 @@ def pick_sources(briefing, sources, limit):
     return sorted(sources, key=lambda s: rank.get(s["id"], len(rank)))[:limit]
 
 
-async def run_assistant(kind, context):
-    """The longer explanation on the Prediction Lab, Forecasts and Visualizations pages."""
+async def run_assistant(kind, context, question=None):
+    """The explanation behind every AI button and the AI Analyst page."""
     _require_keys()
-    output, sources, searches = await _run_agent(ASSISTANT_INSTRUCTION, build_assistant_message(kind, context), AssistantOutput)
+    output, sources, searches = await _run_agent(ASSISTANT_INSTRUCTION, build_message(kind, context, question), AssistantOutput)
     briefing, invalid = clean_briefing(output, {s["id"] for s in sources})
 
     ordered = pick_sources(briefing, sources, config.AI_ASSISTANT_MAX_SOURCES)

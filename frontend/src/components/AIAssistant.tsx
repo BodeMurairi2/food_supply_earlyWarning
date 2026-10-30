@@ -21,7 +21,7 @@ function Heading({ children, tag }: { children: React.ReactNode; tag?: string })
 function Outlook({ title, outlook }: { title: string; outlook: AssistantOutlook }) {
   return (
     <section>
-      <Heading tag="AI judgement, not a model forecast">{title}</Heading>
+      <Heading>{title}</Heading>
       <div className="space-y-3 text-sm leading-relaxed text-gray-700">
         {outlook.assessment.map((p, i) => <p key={i}>{p}</p>)}
       </div>
