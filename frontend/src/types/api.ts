@@ -101,8 +101,10 @@ export interface Performance {
   train: Scores
   test_all_rows: Scores
   test_real_surveys: Scores
+  persistence_all_rows: Scores
   persistence_real_surveys: Scores
   risk_class_agreement_real_surveys: number
+  classification_test_all_rows: ClassificationScores
   classification_real_surveys: ClassificationScores
   by_year: (Scores & { year: number; observation_type: string })[]
   by_province_real_surveys: (Scores & { province: string })[]

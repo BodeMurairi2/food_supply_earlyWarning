@@ -15,12 +15,12 @@ import type { ClassificationScores, HistoricalRow } from '../types/api'
 const PAGE_SIZE = 15
 const TEST_YEARS = [2021, 2022, 2023, 2024]
 
-/** How well the predicted percentages land in the right risk class, on the real surveys only. */
+/** How well the predicted percentages land in the right risk class, on the 2021-2024 test data. */
 function RiskClassCard({ scores }: { scores: ClassificationScores }) {
   const high = scores.classes.find((c) => c.label === 'High')
   return (
-    <Card title="Risk class performance on real surveys"
-      subtitle={`Predictions turned into Low, Medium and High, compared with the 2021 and 2024 surveys (${scores.n} district-years). Accuracy ${num(scores.accuracy, 3)}.`}>
+    <Card title="Risk class performance on test data (2021–2024)"
+      subtitle={`Predictions turned into Low, Medium and High (${scores.n} district-years). Accuracy ${num(scores.accuracy, 3)}. 2021 and 2024 are real surveys; 2022–2023 are interpolated between them.`}>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px]">
           <thead>
@@ -56,7 +56,7 @@ function RiskClassCard({ scores }: { scores: ClassificationScores }) {
       <div className="mt-3 space-y-2">
         {high && (
           <Note>
-            High districts are often missed: the model caught {high.correct} of {high.observed} on these surveys and labelled most of the
+            High districts are often missed: the model caught {high.correct} of {high.observed} in these years and labelled most of the
             others Medium. Read the percentage and the ranking as well as the label, and treat districts near 30% as a warning too.
             With only {high.observed} High districts, these figures can move a lot.
           </Note>
@@ -106,18 +106,18 @@ export default function Historical() {
         {perf.error && <ErrorState message={perf.error} onRetry={perf.reload} />}
         {p && (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard icon={<Target className="h-5 w-5" />} label="MAE on real surveys (2021, 2024)"
-              value={`${num(p.test_real_surveys.mae, 2)} pts`} hint={`Persistence baseline ${num(p.persistence_real_surveys.mae, 2)} pts`} />
-            <StatCard icon={<Scale className="h-5 w-5" />} tone="blue" label="RMSE on real surveys"
-              value={`${num(p.test_real_surveys.rmse, 2)} pts`} hint={`Persistence ${num(p.persistence_real_surveys.rmse, 2)} pts`} />
-            <StatCard icon={<Gauge className="h-5 w-5" />} tone="amber" label="R² on real surveys"
-              value={num(p.test_real_surveys.r2, 3)} hint={`Persistence ${num(p.persistence_real_surveys.r2, 3)} · n = ${p.test_real_surveys.n}`} />
-            <StatCard icon={<TrendingDown className="h-5 w-5" />} tone="danger" label="Risk class agreement"
-              value={pct(p.risk_class_agreement_real_surveys * 100, 0)} hint="Low / Medium / High, real surveys" />
+            <StatCard icon={<Target className="h-5 w-5" />} label="MAE on test data (2021–2024)"
+              value={`${num(p.test_all_rows.mae, 2)} pts`} hint={`Persistence baseline ${num(p.persistence_all_rows.mae, 2)} pts`} />
+            <StatCard icon={<Scale className="h-5 w-5" />} tone="blue" label="RMSE on test data"
+              value={`${num(p.test_all_rows.rmse, 2)} pts`} hint={`Persistence ${num(p.persistence_all_rows.rmse, 2)} pts`} />
+            <StatCard icon={<Gauge className="h-5 w-5" />} tone="amber" label="R² on test data"
+              value={num(p.test_all_rows.r2, 3)} hint={`Persistence ${num(p.persistence_all_rows.r2, 3)} · n = ${p.test_all_rows.n}`} />
+            <StatCard icon={<TrendingDown className="h-5 w-5" />} tone="danger" label="Risk class accuracy"
+              value={pct(p.classification_test_all_rows.accuracy * 100, 0)} hint="Low / Medium / High, test data" />
           </div>
         )}
 
-        {p && <RiskClassCard scores={p.classification_real_surveys} />}
+        {p && <RiskClassCard scores={p.classification_test_all_rows} />}
 
         {hist.error && <ErrorState message={hist.error} onRetry={hist.reload} />}
         {hist.loading && !hist.data && <Loading />}
@@ -203,10 +203,9 @@ export default function Historical() {
                     </table>
                   </div>
                   <Pagination page={page} pages={pages} onChange={setPage} total={rows.length} pageSize={PAGE_SIZE} />
-                  {hist.data.metrics.real_surveys.n > 0 && (
+                  {hist.data.metrics.all_rows.n > 0 && (
                     <p className="mt-3 text-xs text-gray-500">
-                      This selection: MAE {num(hist.data.metrics.real_surveys.mae, 2)} pts on {hist.data.metrics.real_surveys.n} real survey rows
-                      (persistence {num(hist.data.metrics.persistence_real_surveys.mae, 2)} pts); {num(hist.data.metrics.all_rows.mae, 2)} pts on all {hist.data.metrics.all_rows.n} rows.
+                      This selection: MAE {num(hist.data.metrics.all_rows.mae, 2)} pts on {hist.data.metrics.all_rows.n} rows.
                     </p>
                   )}
                 </>
