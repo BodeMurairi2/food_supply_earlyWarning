@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronRight, Play, RotateCcw } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import AIAssistant from '../components/AIAssistant'
 import ContributionChart from '../components/ContributionChart'
 import { LocationFilters, YearSelect, type LocationValue } from '../components/LocationFilters'
 import { Card, EmptyState, ErrorState, Loading, Note, PageHeader, RiskBadge } from '../components/ui'
@@ -35,6 +36,7 @@ export default function PredictionLab() {
   const [showMore, setShowMore] = useState(false)
   const [result, setResult] = useState<PredictResult | null>(null)
   const [running, setRunning] = useState(false)
+  const [ranInputs, setRanInputs] = useState<Record<string, number | null>>({})
   const [runError, setRunError] = useState<string | null>(null)
 
   const defaults = useApi(() => api.predictDefaults(loc.district, year), [loc.district, year], !!loc.district)
@@ -73,6 +75,7 @@ export default function PredictionLab() {
         return [f.feature, v === undefined || v === '' ? null : Number(v)]
       }))
       setResult(await api.predict({ district: loc.district, year, inputs: body }))
+      setRanInputs(body)
     } catch (e) {
       setRunError((e as Error).message)
     } finally {
@@ -180,6 +183,12 @@ export default function PredictionLab() {
           )}
         </div>
       </div>
+      {result && (
+        <div className="mt-6">
+          <AIAssistant key={JSON.stringify([result.district, result.year, ranInputs])} title={`AI assistant: ${result.district}, ${result.year}`}
+            request={{ kind: 'prediction', district: result.district, year: result.year, inputs: ranInputs }} />
+        </div>
+      )}
       {result && <div className="mt-6"><Note>{result.note}</Note></div>}
     </>
   )
