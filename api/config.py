@@ -119,7 +119,7 @@ SAS_PARTIAL_YEARS = {2026: "2026 covers Seasons B and C of 2025 only; Season A 2
 
 # ---------- AI Analyst ----------
 # The LLM is reached through LiteLLM; an "openrouter/..." model uses OPENROUTER_API_KEY.
-LLM_MODEL = os.getenv("HW_LLM_MODEL", "openrouter/anthropic/claude-sonnet-5.5")
+LLM_MODEL = os.getenv("HW_LLM_MODEL", "openrouter/anthropic/claude-haiku-5.5")
 TAVILY_URL = "https://api.tavily.com/search"
 # Tavily search depth: "basic" (cheaper) or "advanced" (better results, more credits); also "fast", "ultra-fast".
 SEARCH_DEPTH = os.getenv("SEARCH_DEPTH", "basic").strip().lower()
