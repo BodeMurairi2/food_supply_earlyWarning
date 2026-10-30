@@ -150,35 +150,35 @@ Precision, recall, F1 and ROC-AUC are averages across the three classes.
 
 **Test data 2021–2024** (accuracy 70.0%)
 
-| Class | Precision | Recall | F1 | ROC-AUC | Found / actual |
-| --- | --- | --- | --- | --- | --- |
-| Low | 82.1% | 54.8% | 65.7% | 91.1% | 23 / 42 |
-| Medium | 65.9% | 87.1% | 75.0% | 81.0% | 54 / 62 |
-| High | 70.0% | 43.8% | 53.8% | 95.4% | 7 / 16 |
+| Class | Precision | Recall | F1 | ROC-AUC |
+| --- | --- | --- | --- | --- |
+| Low | 82.1% | 54.8% | 65.7% | 91.1% |
+| Medium | 65.9% | 87.1% | 75.0% | 81.0% |
+| High | 70.0% | 43.8% | 53.8% | 95.4% |
 
 **Real surveys 2021 & 2024** (accuracy 66.7%)
 
-| Class | Precision | Recall | F1 | ROC-AUC | Found / actual |
-| --- | --- | --- | --- | --- | --- |
-| Low | 73.3% | 55.0% | 62.9% | 87.8% | 11 / 20 |
-| Medium | 65.9% | 81.8% | 73.0% | 73.8% | 27 / 33 |
-| High | 50.0% | 28.6% | 36.4% | 92.5% | 2 / 7 |
+| Class | Precision | Recall | F1 | ROC-AUC |
+| --- | --- | --- | --- | --- |
+| Low | 73.3% | 55.0% | 62.9% | 87.8% |
+| Medium | 65.9% | 81.8% | 73.0% | 73.8% |
+| High | 50.0% | 28.6% | 36.4% | 92.5% |
 
 **Real survey 2021** (accuracy 60.0%)
 
-| Class | Precision | Recall | F1 | ROC-AUC | Found / actual |
-| --- | --- | --- | --- | --- | --- |
-| Low | 71.4% | 41.7% | 52.6% | 87.0% | 5 / 12 |
-| Medium | 52.4% | 84.6% | 64.7% | 73.8% | 11 / 13 |
-| High | 100.0% | 40.0% | 57.1% | 96.0% | 2 / 5 |
+| Class | Precision | Recall | F1 | ROC-AUC |
+| --- | --- | --- | --- | --- |
+| Low | 71.4% | 41.7% | 52.6% | 87.0% |
+| Medium | 52.4% | 84.6% | 64.7% | 73.8% |
+| High | 100.0% | 40.0% | 57.1% | 96.0% |
 
 **Real survey 2024** (accuracy 73.3%)
 
-| Class | Precision | Recall | F1 | ROC-AUC | Found / actual |
-| --- | --- | --- | --- | --- | --- |
-| Low | 75.0% | 75.0% | 75.0% | 93.2% | 6 / 8 |
-| Medium | 80.0% | 80.0% | 80.0% | 80.2% | 16 / 20 |
-| High | 0.0% | 0.0% | 0.0% | 89.3% | 0 / 2 |
+| Class | Precision | Recall | F1 | ROC-AUC |
+| --- | --- | --- | --- | --- |
+| Low | 75.0% | 75.0% | 75.0% | 93.2% |
+| Medium | 80.0% | 80.0% | 80.0% | 80.2% |
+| High | 0.0% | 0.0% | 0.0% | 89.3% |
 
 ROC-AUC uses the share of the forest's trees that predict each class.
 
