@@ -13,3 +13,7 @@ frontend/node_modules/
 frontend/dist/
 .pytest_cache/
 .env
+analysis.ipynb
+confusion_matrix.png
+HarvestWatch Analytics Dashboard Collage.png
+cached confusion_matrix_2024.png

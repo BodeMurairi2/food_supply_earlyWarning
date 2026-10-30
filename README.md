@@ -5,6 +5,8 @@ Agnes Marie Merci Mbabazi & Bode Murai Murairi
 
 Video walkthrough: https://youtu.be/Z_OSBGWulKI
 
+Project report: [HarvestWatch documentation (PDF)](HarvestWatch_Documentation_NISR_big_data_competition.pdf)
+
 ## Problem
 
 Rwanda measures food security well, but late. The CFSVA survey runs every three years, and price, rainfall and crop reports are published separately. In 2024, 17% of households were food insecure, from 4% in Kigali to 38% in Nyamasheke. HarvestWatch combines public NISR, satellite and market data to predict, before each survey, whether each of Rwanda's 30 districts will have **Low (<15%)**, **Medium (15–30%)** or **High (≥30%)** food insecurity, so that MINAGRI, NISR and district officers can act early.
