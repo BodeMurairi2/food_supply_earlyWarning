@@ -21,6 +21,16 @@ def test_performance_matches_notebook(client):
     assert p["test_real_surveys"]["mae"] < p["persistence_real_surveys"]["mae"]
 
 
+def test_risk_class_scores_on_real_surveys(client):
+    c = client.get("/api/model/performance").json()["classification_real_surveys"]
+    assert c["n"] == 60 and c["accuracy"] == 0.667
+    assert c["macro"] == {"precision": 0.631, "recall": 0.551, "f1": 0.574, "roc_auc": 0.847}
+    by_class = {x["label"]: x for x in c["classes"]}
+    assert (by_class["High"]["correct"], by_class["High"]["observed"], by_class["High"]["roc_auc"]) == (2, 7, 0.925)
+    assert (by_class["Low"]["precision"], by_class["Low"]["recall"], by_class["Low"]["f1"]) == (0.733, 0.55, 0.629)
+    assert by_class["Medium"]["recall"] == 0.818
+
+
 def test_forecasts_cover_all_districts(client):
     rows = client.get("/api/forecasts").json()["rows"]
     assert len(rows) == 30

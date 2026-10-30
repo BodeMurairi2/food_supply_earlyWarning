@@ -9,6 +9,8 @@ import json
 from functools import cached_property
 
 import joblib
+import numpy as np
+import pandas as pd
 
 from api import config
 from api.data.dataset import LABEL_SOURCE_NAMES
@@ -44,6 +46,21 @@ class ModelRegistry:
         rows["persistence"] = rows["last_survey_food_insecure_pct"]
         shap_values = self.eval_explainer.explain(X)
         return rows, shap_values
+
+    @cached_property
+    def historical_class_probabilities(self):
+        """2021-2024 rows: for each risk class, the share of the evaluation forest's trees that predict it."""
+        rows, _ = self.historical
+        pipeline = self.eval_model
+        Xt = pipeline.named_steps["preprocess"].transform(rows[self.features])
+        Xt = Xt.toarray() if hasattr(Xt, "toarray") else Xt
+        votes = np.stack([tree.predict(Xt) for tree in pipeline.named_steps["regressor"].estimators_], axis=1)
+        shares = {}
+        for t in config.RISK_THRESHOLDS:
+            above = votes >= t["min"] if t["min"] is not None else np.ones_like(votes, bool)
+            below = votes < t["max"] if t["max"] is not None else np.ones_like(votes, bool)
+            shares[t["label"]] = (above & below).mean(axis=1)
+        return pd.DataFrame(shares, index=rows.index)
 
     @cached_property
     def forecasts(self):
