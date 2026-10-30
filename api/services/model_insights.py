@@ -22,8 +22,11 @@ def performance(ctx):
         "train": scores(train[ctx.models.target], ctx.models.eval_model.predict(train[ctx.models.features])),
         "test_all_rows": scores(rows["observed"], rows["predicted"]),
         "test_real_surveys": scores(survey["observed"], survey["predicted"]),
+        "persistence_all_rows": scores(rows["observed"], rows["persistence"]),
         "persistence_real_surveys": scores(survey["observed"], survey["persistence"]),
         "risk_class_agreement_real_surveys": clean(class_agreement),
+        "classification_test_all_rows": classification_scores(
+            rows["observed_risk"], rows["predicted_risk"], ctx.models.historical_class_probabilities),
         "classification_real_surveys": classification_scores(
             survey["observed_risk"], survey["predicted_risk"], ctx.models.historical_class_probabilities.loc[survey.index]),
         "by_year": by_year,

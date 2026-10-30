@@ -31,6 +31,17 @@ def test_risk_class_scores_on_real_surveys(client):
     assert by_class["Medium"]["recall"] == 0.818
 
 
+def test_risk_class_scores_on_test_data(client):
+    p = client.get("/api/model/performance").json()
+    c = p["classification_test_all_rows"]
+    assert c["n"] == 120 and c["accuracy"] == 0.7
+    assert c["macro"] == {"precision": 0.727, "recall": 0.619, "f1": 0.649, "roc_auc": 0.892}
+    by_class = {x["label"]: x for x in c["classes"]}
+    assert (by_class["High"]["correct"], by_class["High"]["observed"]) == (7, 16)
+    assert [by_class[k]["roc_auc"] for k in ("Low", "Medium", "High")] == [0.911, 0.81, 0.954]
+    assert p["persistence_all_rows"]["n"] == 120
+
+
 def test_forecasts_cover_all_districts(client):
     rows = client.get("/api/forecasts").json()["rows"]
     assert len(rows) == 30
