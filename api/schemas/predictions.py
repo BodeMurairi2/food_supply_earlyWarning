@@ -1,4 +1,4 @@
-"""Request and response models for the HarvestWatch API."""
+"""Models for the Prediction Lab."""
 
 from typing import Optional
 
@@ -42,20 +42,3 @@ class PredictResponse(BaseModel):
     dataset_value_this_year: Optional[float]
     model: str
     note: str
-
-
-class HealthResponse(BaseModel):
-    status: str
-    dataset_rows: int
-    models_loaded: list[str]
-
-
-class AnalyzeRequest(BaseModel):
-    district: str = Field(..., max_length=40)
-    year: int = Field(..., ge=2021, le=2026, description="2021-2024: test years; 2025-2026: forecasts")
-    question: Optional[str] = Field(None, max_length=300, description="Optional research question")
-
-
-class SearchRequest(BaseModel):
-    query: str = Field(..., min_length=3, max_length=300)
-    max_results: int = Field(5, ge=1, le=10)
