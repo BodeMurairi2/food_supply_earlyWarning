@@ -104,6 +104,15 @@ def assistant_context(ctx, req):
     """The numbers the AI assistant may use, recomputed here so they cannot be altered by the browser."""
     if req.kind == "prediction":
         return _prediction_context(ctx, req)
+    if req.kind == "historical":
+        if not req.district or req.year is None:
+            raise ValueError("Choose a district and a year")
+        if not config.TEST_YEARS[0] <= req.year <= config.TEST_YEARS[1]:
+            raise ValueError("Historical results are available for 2021-2024")
+        context = ai_context(ctx, req.district, req.year)
+        point = next(p for p in district_series(ctx, req.district)["series"] if p["year"] == req.year)
+        context["model"]["observed_value_type"] = point["observation_type"]
+        return context
     if req.kind == "forecast":
         if not req.district or req.year is None:
             raise ValueError("Choose a district and a year")
